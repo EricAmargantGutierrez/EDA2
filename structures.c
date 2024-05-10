@@ -7,8 +7,8 @@ typedef struct {
     int HP;
     int atk_pts;
     int def_pts;
-    int skills[4];
     char chosen_path;
+    int skills[4];
 } Character;
 
 typedef struct {
@@ -44,7 +44,7 @@ typedef struct {
 }Scenario;
 
 typedef struct QueueNode {
-    Character *character;
+    int move_used;
     struct QueueNode *next;
 } QueueNode;
 
@@ -55,3 +55,16 @@ typedef struct {
     int elements;
 } Queue;
 
+Queue* init_queue(Queue *q){
+    q->head=NULL;
+    q->tail=NULL;
+    q->elements=0;
+    return q;
+}
+
+void enqueue(Queue* q, int move){
+    q->elements+=1;
+    QueueNode* node={move, NULL};
+    q->tail->next=node;
+    q->tail=q->tail->next;
+}

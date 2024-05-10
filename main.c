@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
-#include "structures.c"
 #include <stdlib.h>
+#include "battles.h"
 
 //OJOOO, CAL CORREGIR ERRORS I A MÉS, FER SERVIR LES STRUCT ja que NO hem fet servir skill, decision, scenario, etc!!!!!
 
