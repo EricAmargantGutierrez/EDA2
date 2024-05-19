@@ -1,128 +1,22 @@
-#include <stdio.h>
-#include <stdbool.h>
+#include "battles.c"
 
-
-// Define constants
-#define MAX_SKILLS 4
-#define MAX_ENEMIES 3
-#define OPTIONS 2
-
-// Define the structs
-
-typedef struct {
-    char name[50];
-    char description[300];
-    bool can_be_used;
-    float mod_atk;
-    float mod_def;
-    float mod_hp;
-} Skill;
-
-typedef struct {
-    char name[50];
-    float HP;
-    float atk_pts;
-    float def_pts;
-    Skill skills[4];
-} Character;
-
-typedef struct {
-    char name[50];
-    float hp;
-    float atk;
-    float def;
-    Skill skills[3]; //enemies cannot heal themselves
-}Enemy;
-
-typedef struct{
-    char narrative_text_i[400];
-    char response_text[200];
-    char narrative_text_f[400];
-    float hp_incr;
-    float atk_incr;
-    float def_incr;
-} Option;
-
-typedef struct {
-    char question_text[400];
-    Option *options[2];
-} Decision;
-
-typedef struct  scen {
-    char name[50];
-    char description[400];
-    Enemy *enemies;
-    Decision *choice;
-    struct scen *next;
-} Scenario;
-
-
-typedef struct BattleTurn {
-    int move_used;
-    Character *character;
-    struct BattleTurn *next;
-} BattleTurn;
-
-// Queue
-typedef struct {
-    BattleTurn *head;
-    BattleTurn *tail;
-    int elements;
-} BattleQueue;
-
-void init_queue(BattleQueue *q){
-    q->head=NULL;
-    q->tail=NULL;
-    q->elements=0;
-}
-
-void enqueue_move(BattleQueue* q, int move, Character *character){
-    q->elements+=1;
-
-    BattleTurn *node = (BattleTurn *)malloc(sizeof(BattleTurn));
-    if (node == NULL) {
-        // Handle memory allocation failure
-        return;
-    }
-
-    // Initialize the new node
-    node->move_used = move;
-    node->character = character;
-    node->next = NULL;
-
-    // If the queue is empty, set head to the new node
-    if (q->tail == NULL) {
-        q->head = node;
-    } else {
-        // Link the new node to the end of the queue
-        q->tail->next = node;
-    }
-
-    // Update the tail pointer to the new node
-    q->tail = node;
-
-}
-
-
-Skill hero_skills[4] = {
-        {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", true, 10, 5, 5},
-        {"Agile Attack", "Use your youth and agility to surprise your enemy and dodge the enemy (extra defence). Note that this attack works well against certain types of enemies.", true, 5, 10, 5},
-        {"Berserk", "You picture the emperor (he who is responsible for the death of your loved ones) as your enemy, you go crazy and inflict lots of damage on your enemy. Note that this attack works well against certain types of enemies.", true, 15, 0, 0},
+Skill skills[4] = {
+        {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", false, 5, 0, 0},
+        {"Agile Attack", "Use your youth and agility to surprise your enemy. Note that this attack works well against certain types of enemies.", false, 5, 0, 0},
+        {"Berserk", "You picture the emperor (he who is responsible for the death of your loved ones) as your enemy, you go crazy and inflict lots of damage on your enemy. Note that this attack works well against certain types of enemies.", false, 5, 0, 0},
         {"Heal", "Use your medicinal knowledge to heal yourself (+100 HP). Note that this ability can only be used once.", true, 0, 0, 100}
     };
 
-// cambiar les skills que hi han aqui
-Skill enemy_skills[3] = {
-        {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", false, 10, 0, 0},
-        {"Agile Attack", "Use your youth and agility to surprise your enemy. Note that this attack works well against certain types of enemies.", false, 5, 0, 0},
-        {"Berserk", "You picture the emperor (he who is responsible for the death of your loved ones) as your enemy, you go crazy and inflict lots of damage on your enemy. Note that this attack works well against certain types of enemies.", false, 15, 0, 0},
-    };    
+// Define the characters' stats
+Character c1 = {"Arnaus Decimus Meridius",100, 1, 1}; // Arnaus Decimus Meridius
+Character c2 = {"Ericus Carpophorus", 100, 0.9, 1.1}; // Ericus Carpophorus
+Character c3 = {"Paullus Acilius Glabrio", 100, 1.2, 0.8}; // Paullus Acilius Glabrio
 
 // Initialize enemies
-//Enemy decimus = {"Decimus Brutus", 80, 0.4, 0.5}; //cambiar pq no puguin fer servir totes les skills
-Enemy cult = {"Cult of Bacchus", 90, 0.7, 0.6};
-Enemy mercenaries = {"The Mercenaries", 100, 0.7, 0.9};
-Enemy Sulla = {"Lucius Cornelius Sulla", 120, 1, 1.1};
+Enemy decimus = {"Decimus Brutus", 80, 0.4, 0.5, skills}; //cambiar pq no puguin fer servir totes les skills
+Enemy cult = {"Cult of Bacchus", 90, 0.7, 0.6, skills};
+Enemy mercenaries = {"The Mercenaries", 100, 0.7, 0.9, skills};
+Enemy Sulla = {"Lucius Cornelius Sulla", 120, 1, 1.1, skills};
 
 
 
@@ -162,4 +56,4 @@ Scenario thermal_baths = {"The Thermal Baths", "After the tumultuous events in P
 
 Scenario shadows_of_pompeii = {"Shadows of Pompeii", "In the twilight of Pompeii's ruins, mysteries lurk beneath ash-covered streets. Navigate shadows fraught with intrigue and danger. Will you unravel secrets or become entangled in deceit? Choose wisely; in Pompeii, history's whispers echo loudest", &cult, &pompeii_dec, &thermal_baths};
 
-Scenario rome = {"Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &cult /* aixo s'haura de canviar a decimus dsps*/, &rome_dec, &shadows_of_pompeii};
+Scenario rome = {"Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &decimus, &rome_dec, &shadows_of_pompeii};
