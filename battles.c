@@ -9,7 +9,6 @@ void turn(Character* player, Enemy *enemy1, int move){
     // calculate the attack damage arithmetically
     //printf("Player \tatk %.2f, mod %.2f \n", player->atk_pts, player->skills[move-1].mod_atk);
     float damage=(player->skills[move-1].mod_atk+player->atk_pts);
-    
     // subtract to the damage the defense of the enemy
     damage-=(enemy1->def)/2;
     // as this is still an RPG, there is some luck component associated to the result
@@ -60,7 +59,8 @@ void battle(Character* player, Enemy* enemy){
         printf("Enter your move: \n");
         printf("1. %s\n2. %s\n3. %s\n", player->skills[0].name, player->skills[1].name, player->skills[2].name);
         if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].name);}
-        printf("5. Info\n\n...\n");
+        if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].name);}
+        printf("6. Info\n\n...\n");
         check=scanf("%d", &move);
         float enemy_attack;
         switch (move) {
@@ -70,7 +70,7 @@ void battle(Character* player, Enemy* enemy){
                 // enqueue the move used
                 enqueue_battle_move(&q, move, player);
                 // push the move used
-                push_battle_move(&q, move, player);
+                push_battle_move(&stack, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -82,7 +82,7 @@ void battle(Character* player, Enemy* enemy){
                 // enqueue the move used
                 enqueue_battle_move(&q, move, player);
                 // push the move used
-                push_battle_move(&q, move, player);
+                push_battle_move(&stack, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -94,7 +94,7 @@ void battle(Character* player, Enemy* enemy){
                 // enqueue the move used
                 enqueue_battle_move(&q, move, player);
                 // push the move used
-                push_battle_move(&q, move, player);
+                push_battle_move(&stack, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -109,7 +109,7 @@ void battle(Character* player, Enemy* enemy){
                 // enqueue the move used
                 enqueue_battle_move(&q, move, player);
                 // push the move used
-                push_battle_move(&q, move, player);
+                push_battle_move(&stack, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -117,8 +117,50 @@ void battle(Character* player, Enemy* enemy){
                 player->skills[3].can_be_used=false;
                 break;
             case 5:
+                if(!player->skills[4].can_be_used){
+                    printf("Already used this skill the maximum number of times");
+                    break;}
+                if(stack.elements<1){ printf("Can't be used, too few previous moves");
+                    break;};
+                // we want to make sure that we will pop at least one element
+                int turns=rand()%(stack.elements);
+                turns++;
+                BattleTurn result;
+                for(int i=0; i<turns; i++){
+                    result=pop_battle_move(&stack);
+                }
+                // Calculate the turn and inflict the damage
+
+                // Make sure that we are not repeating a move that can only be used once (eg. HEALING)
+                // as that would give a huge advantage of potentially +300HP
+                if(!player->skills[result.move_used-1].can_be_used){
+                    result.move_used--;
+                }
+                // calculate the attack damage arithmetically, but give 2x the weight to the skill used
+                printf("The time move is...\n%s\n\n", player->skills[result.move_used-1].name);
+                float damage=2*(player->skills[result.move_used-1].mod_atk)+player->atk_pts;
+                // subtract to the damage the defense of the enemy
+                damage-=(enemy->def)/2;
+                // as this is still an RPG, there is some luck component associated to the result
+                float odds=(rand()%31);
+                odds/=100;
+                odds+=0.8;
+                // multiply the damage by the "luck factor"
+                float attack_damage=damage*odds;
+                player->HP+=2*player->skills[result.move_used-1].mod_hp;
+                enemy->hp-=attack_damage;
+                // Enemy counter_attack
+                enemy_attack=rand()%3;
+                counter_Attack(enemy, player, enemy_attack, move);
+                printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
+                // enqueue the move used
+                enqueue_battle_move(&q, move, player);
+                player->skills[4].can_be_used=false;
+                break;
+            case 6:
                 printf("1. %s\n2. %s\n3. %s\n", player->skills[0].description, player->skills[1].description, player->skills[2].description);
                 if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].description);}
+                if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].description);}
                 break;
             default:
                 printf("Invalid choice. Please enter a valid option.\n");
