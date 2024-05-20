@@ -157,22 +157,6 @@ void display_menu(Character *player) {
     } while (choice != 4);
 }
 
-
-void print_enemy_info(Enemy* enemy) {
-    printf("Enemy Name: %s\n", enemy->name);
-    printf("Enemy Attack: %d\n", enemy->atk);
-    printf("Enemy HP: %d\n", enemy->hp);
-    printf("Enemy Defense: %d\n", enemy->def);
-}
-
-// Function to print information of a player (Character)
-void print_player_info(Character* player) {
-    printf("Player Name: %s\n", player->name);
-    printf("Player Attack Points: %d\n", player->atk_pts);
-    printf("Player HP: %d\n", player->HP);
-    printf("Player Defense Points: %d\n", player->def_pts);
-}
-
 void main(){
     Character player;
     display_menu(&player);

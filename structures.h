@@ -130,10 +130,65 @@ BattleTurn dequeue_battle_move(BattleQueue* q) {
     return *temp;
 }
 
+// Stack
+typedef struct {
+    BattleTurn *head;
+    int elements;
+} BattleStack;
 
+void init_battle_stack(BattleStack *s) {
+    s->head = NULL;
+    s->elements = 0;
+}
 
+void push_battle_move(BattleStack *s, int move, Character *character) {
+    s->elements += 1;
 
+    BattleTurn *node = (BattleTurn *)malloc(sizeof(BattleTurn));
+    if (node == NULL) {
+        // Handle memory allocation failure
+        return;
+    }
 
+    // Initialize the new node
+    node->move_used = move;
+    node->character = character;
+    node->next = s->head;
+
+    // Update the head pointer to the new node
+    s->head = node;
+}
+
+BattleTurn pop_battle_move(BattleStack *s) {
+    BattleTurn result;
+
+    // Check if the stack is empty
+    if (s->head == NULL) {
+        // Stack is empty, nothing to pop
+        // Handle the error as appropriate
+        // Returning an uninitialized result here; you may want to handle this case differently
+        return result;
+    }
+
+    // Store the current head node in a temporary variable
+    BattleTurn *temp = s->head;
+
+    // Move the head pointer to the next node
+    s->head = s->head->next;
+
+    // Copy the data from the node to the result before freeing it
+    result.move_used = temp->move_used;
+    result.character = temp->character;
+
+    // Free the memory of the popped node
+    free(temp);
+
+    // Decrease the count of elements in the stack
+    s->elements -= 1;
+
+    // Return the popped turn
+    return result;
+}
 
 
 typedef struct Chapter {    // We will use this as the nodes in the scenario queues
@@ -210,15 +265,6 @@ Chapter dequeue_scenario(ScenarioQueue* q) {
 }
 
 
-
-
-
-
-
-
-
-
-
 Skill hero_skills[4] = {
         {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", true, 10, 5, 5},
         {"Agile Attack", "Use your youth and agility to surprise your enemy and dodge the enemy (extra defence). Note that this attack works well against certain types of enemies.", true, 5, 10, 5},
@@ -234,21 +280,21 @@ Skill enemy_skills[3] = {
     };    
 
 // Initialize options
-Option opt1_rome = {"Forge Alliances", "You form alliances with other gladiators, pooling your strengths to overcome rivals together.", "Your alliances prove beneficial, leading to an increase in your characters attack points by 1.", 0, 0.1, 0};
+Option opt1_rome = {"Forge Alliances", "You form alliances with other gladiators, pooling your strengths to overcome rivals together.", "Your alliances prove beneficial, leading to an increase in your characters attack points by 1.", 0, 1, 0};
 
-Option opt2_rome = {"Face Adversaries", "You confront your adversaries directly, relying on your individual skills to prevail in combat.", "Your prowess in combat impresses both allies and rivals, solidifying your reputation as a formidable gladiator. Your HP and defense are increased by 1. Nevertheless, you got slightly injured, so your attack is reduced by 2 point", 10, -0.2, 0.1};
+Option opt2_rome = {"Face Adversaries", "You confront your adversaries directly, relying on your individual skills to prevail in combat.", "Your prowess in combat impresses both allies and rivals, solidifying your reputation as a formidable gladiator. Your HP and defense are increased by 1. Nevertheless, you got slightly injured, so your attack is reduced by 2 point", 10, -2, 1};
 
-Option opt1_pompeii = {"Ally with Caesar", "You decide to ally yourself with Julius Caesar, intrigued by the potential benefits of such a powerful connection.", "Your alliance with Julius Caesar opens doors to new opportunities and grants you access to influential circles in Pompeii. You exploit those connections and gain 2 attack points but your defense is reduced by 1 as powerful enemies have spotted some of your weak points.", 0, 0.2, -0.1};
+Option opt1_pompeii = {"Ally with Caesar", "You decide to ally yourself with Julius Caesar, intrigued by the potential benefits of such a powerful connection.", "Your alliance with Julius Caesar opens doors to new opportunities and grants you access to influential circles in Pompeii. You exploit those connections and gain 2 attack points but your defense is reduced by 1 as powerful enemies have spotted some of your weak points.", 0, 2, -1};
 
-Option opt2_pompeii = {"Exercise Caution", "You choose to tread cautiously, wary of Julius Caesar's motives and the risks associated with such a partnership.", "Your cautious approach safeguards you from potential pitfalls and allows you to navigate the political landscape of Pompeii with prudence. You gain 2 HP points.", 0, 0, 0.2};
+Option opt2_pompeii = {"Exercise Caution", "You choose to tread cautiously, wary of Julius Caesar's motives and the risks associated with such a partnership.", "Your cautious approach safeguards you from potential pitfalls and allows you to navigate the political landscape of Pompeii with prudence. You gain 2 HP points.", 0, 0, 2};
 
-Option opt1_thermal = {"Investigate Argument", "You decide to investigate the heated argument, intrigued by the involvement of powerful figures.", "Your investigation uncovers valuable information and earns you the respect of influential individuals in the city. Additionally, Maximus Kratos invited you to a self-defense masterclass, earning you 3 defense points!", 0, 0, 0.3};
+Option opt1_thermal = {"Investigate Argument", "You decide to investigate the heated argument, intrigued by the involvement of powerful figures.", "Your investigation uncovers valuable information and earns you the respect of influential individuals in the city. Additionally, Maximus Kratos invited you to a self-defense masterclass, earning you 3 defense points!", 0, 0, 3};
 
-Option opt2_thermal = {"Mind Your Own Business", "You choose to mind your own business and enjoy the tranquility of the thermal baths, avoiding unnecessary entanglements.", "Your decision to stay out of the argument preserves your peace of mind and allows you to focus on your own goals. Your lack of implication loses you 2 attack points.", 0, -0.2, 0};
+Option opt2_thermal = {"Mind Your Own Business", "You choose to mind your own business and enjoy the tranquility of the thermal baths, avoiding unnecessary entanglements.", "Your decision to stay out of the argument preserves your peace of mind and allows you to focus on your own goals. Your lack of implication loses you 2 attack points.", 0, -2, 0};
 
-Option opt1_colosseum = {"Stand Your Ground", "You choose to stand your ground and face your opponent head-on, relying on your skills and courage to emerge victorious.", "Your bravery and skill in combat earn you the admiration of the crowd and the respect of your opponent. You gain 2 points on defense and 1 HP.", 10, 0, 0.1};
+Option opt1_colosseum = {"Stand Your Ground", "You choose to stand your ground and face your opponent head-on, relying on your skills and courage to emerge victorious.", "Your bravery and skill in combat earn you the admiration of the crowd and the respect of your opponent. You gain 2 points on defense and 1 HP.", 10, 0, 1};
 
-Option opt2_colosseum = {"Analyze Weaknesses", "You opt to analyze your opponent's weaknesses and exploit them strategically, seeking any advantage you can find.", "Your strategic approach seems to pay off as you exploit your opponent's weaknesses, you gain 3 attack points.", 0.3, 0};
+Option opt2_colosseum = {"Analyze Weaknesses", "You opt to analyze your opponent's weaknesses and exploit them strategically, seeking any advantage you can find.", "Your strategic approach seems to pay off as you exploit your opponent's weaknesses, you gain 3 attack points.", 0, 3, 0};
 
 
 // Initialize decisions
