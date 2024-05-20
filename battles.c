@@ -40,10 +40,10 @@ void counter_Attack(Enemy* enemy1, Character* player, int enemy_move, int player
     player->HP-=attack_damage;
 }
 
-void battle1(Character* player, Enemy* enemy){
+void battle(Character* player, Enemy* enemy){
     // Initialize the Queue where we will store the movements
     BattleQueue q;
-    init_queue(&q);
+    init_battle_queue(&q);
     srand(time(NULL));
     
     printf("Enemy HP: %.2f \tYour HP: %.2f \n", enemy->hp, player->HP);
@@ -55,7 +55,10 @@ void battle1(Character* player, Enemy* enemy){
 
 
         while (enemy->hp > 0.0 && player->HP > 0.0){
-        printf("Enter your move (integer from 1-4): ");
+        printf("Enter your move (integer from 1-4): \n");
+        printf("1. %s\n2. %s\n3. %s\n", player->skills[0].name, player->skills[1].name, player->skills[2].name);
+        if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].name);}
+        printf("5. Info:");
         check=scanf("%d", &move);;
         float enemy_attack;
         switch (move) {
@@ -63,7 +66,7 @@ void battle1(Character* player, Enemy* enemy){
                 // Call function to inflict damage on the enemy
                 turn(player, enemy, move);
                 // enqueue the move used
-                enqueue_move(&q, move, player);
+                enqueue_battle_move(&q, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -73,7 +76,7 @@ void battle1(Character* player, Enemy* enemy){
                 // Call function to inflict damage on the enemy
                 turn(player, enemy, move);
                 // enqueue the move used
-                enqueue_move(&q, move, player);
+                enqueue_battle_move(&q, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -83,7 +86,7 @@ void battle1(Character* player, Enemy* enemy){
                 // Call function to inflict damage on the enemy
                 turn(player, enemy, move);
                 // enqueue the move used
-                enqueue_move(&q, move, player);
+                enqueue_battle_move(&q, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
@@ -96,18 +99,43 @@ void battle1(Character* player, Enemy* enemy){
                 // Call function to inflict damage on the enemy
                 turn(player, enemy, move);
                 // enqueue the move used
-                enqueue_move(&q, move, player);
+                enqueue_battle_move(&q, move, player);
                 //enemy's turn
                 enemy_attack=rand()%3;
                 counter_Attack(enemy, player, enemy_attack, move);
                 printf("Enemy HP: %.2f \tYour HP: %.2f \n", enemy->hp, player->HP);
                 player->skills[3].can_be_used=false;
                 break;
+            case 5:
+                printf("1. %s\n2. %s\n3. %s\n", player->skills[0].description, player->skills[1].description, player->skills[2].description);
+                if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].description);}
+                break;
             default:
                 printf("Invalid choice. Please enter a valid option.\n");
                 break;
         }
     } 
+    }
+    BattleTurn move_struct;
+    int i=0;
+    while(q.elements>0){
+        i++;
+        move_struct=dequeue_battle_move(&q);
+        printf("The %d move we used was: %s \n", i, player->skills[move_struct.move_used-1].name);
+    }
+}
 
+
+void game(ScenarioQueue *Q, Character *player){
+    Scenario *scene;
+    Chapter temp;
+    while(Q->elements>0){
+        player->HP=Q->head->life;
+        temp=dequeue_scenario(Q);
+        scene=temp.scene;
+        printf("You are now in %s\n\n", scene->name);
+        printf("%s\n", scene->description);
+        battle(player, scene->enemies);
+        if(Q->elements>0){Q->head->life=player->HP;}
     }
 }

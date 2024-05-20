@@ -70,13 +70,13 @@ typedef struct {
     int elements;
 } BattleQueue;
 
-void init_queue(BattleQueue *q){
+void init_battle_queue(BattleQueue *q){
     q->head=NULL;
     q->tail=NULL;
     q->elements=0;
 }
 
-void enqueue_move(BattleQueue* q, int move, Character *character){
+void enqueue_battle_move(BattleQueue* q, int move, Character *character){
     q->elements+=1;
 
     BattleTurn *node = (BattleTurn *)malloc(sizeof(BattleTurn));
@@ -103,6 +103,121 @@ void enqueue_move(BattleQueue* q, int move, Character *character){
 
 }
 
+BattleTurn dequeue_battle_move(BattleQueue* q) {
+    BattleTurn *temp= (BattleTurn *)malloc(sizeof(BattleTurn));
+;
+    // Check if the queue is empty
+    if (q->head == NULL) {
+        // Queue is empty, nothing to dequeue
+        return *temp;
+    }
+
+    // Store the current head node in a temporary variable
+    temp = q->head;
+
+    // Move the head pointer to the next node
+    q->head = q->head->next;
+
+    // If the queue is now empty, update the tail to NULL as well
+    if (q->head == NULL) {
+        q->tail = NULL;
+    }
+
+    // Decrease the count of elements in the queue
+    q->elements -= 1;
+
+    // Return the first turn
+    return *temp;
+}
+
+
+
+
+
+
+
+typedef struct Chapter {    // We will use this as the nodes in the scenario queues
+    int life;               // we can use this in case we want to go back in the game, to remember the amount of life we had at that point
+    Scenario *scene;
+    struct Chapter *next;
+} Chapter;
+
+// Queue
+typedef struct {
+    Chapter *head;
+    Chapter *tail;
+    int elements;
+} ScenarioQueue;
+
+void init_scene_queue(ScenarioQueue *q){
+    q->head=NULL;
+    q->tail=NULL;
+    q->elements=0;
+}
+
+void enqueue_scenario(ScenarioQueue* q, Scenario *scene){
+    q->elements+=1;
+
+    Chapter *node = (Chapter *)malloc(sizeof(Chapter));
+    if (node == NULL) {
+        // Handle memory allocation failure
+        return;
+    }
+
+    // Initialize the new node
+    node->life = 100;
+    node->scene = scene;
+    node->next = NULL;
+
+    // If the queue is empty, set head to the new node
+    if (q->tail == NULL) {
+        q->head = node;
+    } else {
+        // Link the new node to the end of the queue
+        q->tail->next = node;
+    }
+
+    // Update the tail pointer to the new node
+    q->tail = node;
+
+}
+
+Chapter dequeue_scenario(ScenarioQueue* q) {
+    Chapter *temp= (Chapter *)malloc(sizeof(Chapter));
+;
+    // Check if the queue is empty
+    if (q->head == NULL) {
+        // Queue is empty, nothing to dequeue
+        return *temp;
+    }
+
+    // Store the current head node in a temporary variable
+    temp = q->head;
+
+    // Move the head pointer to the next node
+    q->head = q->head->next;
+
+    // If the queue is now empty, update the tail to NULL as well
+    if (q->head == NULL) {
+        q->tail = NULL;
+    }
+
+    // Decrease the count of elements in the queue
+    q->elements -= 1;
+
+    // Return the first turn
+    return *temp;
+}
+
+
+
+
+
+
+
+
+
+
 
 Skill hero_skills[4] = {
         {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", true, 10, 5, 5},
@@ -117,14 +232,6 @@ Skill enemy_skills[3] = {
         {"Agile Attack", "Use your youth and agility to surprise your enemy. Note that this attack works well against certain types of enemies.", false, 5, 0, 0},
         {"Berserk", "You picture the emperor (he who is responsible for the death of your loved ones) as your enemy, you go crazy and inflict lots of damage on your enemy. Note that this attack works well against certain types of enemies.", false, 15, 0, 0},
     };    
-
-// Initialize enemies
-//Enemy decimus = {"Decimus Brutus", 80, 0.4, 0.5}; //cambiar pq no puguin fer servir totes les skills
-Enemy cult = {"Cult of Bacchus", 90, 0.7, 0.6};
-Enemy mercenaries = {"The Mercenaries", 100, 0.7, 0.9};
-Enemy Sulla = {"Lucius Cornelius Sulla", 120, 1, 1.1};
-
-
 
 // Initialize options
 Option opt1_rome = {"Forge Alliances", "You form alliances with other gladiators, pooling your strengths to overcome rivals together.", "Your alliances prove beneficial, leading to an increase in your characters attack points by 1.", 0, 0.1, 0};
@@ -152,14 +259,3 @@ Decision pompeii_dec = {"At the designated rendezvous point, you come face to fa
 Decision thermal_dec = { "As you soak in the rejuvenating waters, you notice a heated argument unfolding nearby. A group of powerful and influential figures of the city are engaged in a fierce debate, their voices echoing off the marble walls of the baths. Intrigued, you consider whether to investigate further or to mind your own business and enjoy the tranquility of the surroundings.", {&opt1_thermal, &opt2_thermal}};
 
 Decision colosseum_dec = {"As you await your turn in the arena, a hush falls over the crowd, and the gate opens to reveal your opponent: a fierce and imposing gladiator known for their ruthless efficiency in combat. In this moment of truth, will you stand your ground and face your opponent head-on, or will you seek a strategic advantage by analyzing their weaknesses and exploiting them?", {&opt1_colosseum, &opt2_colosseum}};
-
-
-
-// Initialize scenarios, we initialize them in reverse order so we can link the "next" item in the list
-Scenario colosseum_showdown = {"The Colosseum Showdown", "Whatever happens, you end up detained at the hands of the praetorian guard. You are brought back to Rome where a trial is set to begin. After a couple of sessions, it is already clear that the magistrate, the Optimate Dictator Lucius Cornelius Sulla, wants to condemn you whatever the cost may be, and that the sentence is likely set from the beginning of the trial: death at the Tarpeian Rock!", &Sulla, &colosseum_dec, NULL};
-
-Scenario thermal_baths = {"The Thermal Baths", "After the tumultuous events in Pompeii, you seek respite and refuge in the tranquil surroundings of the thermal baths. Here, amidst the soothing waters and opulent surroundings, you contemplate your next move in the ever-shifting game of power and intrigue.", &mercenaries, &thermal_dec, &colosseum_showdown};
-
-Scenario shadows_of_pompeii = {"Shadows of Pompeii", "In the twilight of Pompeii's ruins, mysteries lurk beneath ash-covered streets. Navigate shadows fraught with intrigue and danger. Will you unravel secrets or become entangled in deceit? Choose wisely; in Pompeii, history's whispers echo loudest", &cult, &pompeii_dec, &thermal_baths};
-
-Scenario rome = {"Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &cult /* aixo s'haura de canviar a decimus dsps*/, &rome_dec, &shadows_of_pompeii};

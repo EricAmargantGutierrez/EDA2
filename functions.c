@@ -74,3 +74,23 @@ void recover_player_hp(Character* player, int max_HP) {
     // Set the player's current HP to its maximum HP
     player->HP = max_HP;
 }
+
+
+void init_enemy(Enemy* enemy, char* name, int hp, int atk, int def){
+    strcpy(enemy->name, name);
+    enemy->hp = hp;
+    enemy->atk = atk;
+    enemy->def = def;
+    memcpy(enemy->skills, enemy_skills, sizeof(enemy_skills));
+}
+
+
+void init_scenario(Scenario* scene, char* name, char* descript, Enemy* enemy, Decision* choice, Scenario *next){ //canviar
+    strcpy(scene->name, name);
+    strcpy(scene->description, descript);
+    scene->enemies=enemy;
+    scene->choice = choice;
+    scene->next = next;
+}
+
+

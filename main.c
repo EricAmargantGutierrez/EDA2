@@ -4,11 +4,6 @@
 #include <string.h>
 #include "battles.c"
 
-// Define the characters' stats
-// Arnaus Decimus Meridius
-// Ericus Carpophorus
-// Paullus Acilius Glabrio
-
 /*
 void init_skills(Skill *ability, char* name, char* descript, bool type, int atk, int def, int hp){
     strcpy(ability->name, name);    
@@ -29,22 +24,6 @@ void init_decision(Decision* decision, char* question, int num_options, Option* 
     strcpy(decision->question_text, question);
     decision->number_options = num_options;
     decision->options = options; //change if it doesnt work
-}
-
-void init_enemy(Enemy* enemy, char* name, int hp, int atk, int def, Skill skills[3]){ //canviar
-    strcpy(enemy->name, name);
-    enemy->hp = hp;
-    enemy->atk = atk;
-    enemy->def = def;
-    memcpy(enemy->skills, skills, sizeof(enemy->skills));
-}
-
-void init_scenario(Scenario* scene, char* name, char* descript, Enemy enemies[3], Decision* choice, Scenario *next){ //canviar
-    strcpy(scene->name, name);
-    strcpy(scene->description, descript);
-    memcpy(scene->enemies, enemies, sizeof(scene->enemies));
-    scene->choice = choice;
-    scene->next = next;
 }
 
 */
@@ -108,14 +87,29 @@ void configure_character(Character *player) {
 
 
 void start_game(Character *player){
-    printf("Test %.2f, %.2f, %.2f", player->skills[1].mod_def, player->skills[1].mod_hp, player->skills[1].mod_atk);
     Enemy decimus;
-    strcpy(decimus.name, "Decimus Brutus");
-    decimus.hp = 80;
-    decimus.atk = 5;
-    decimus.def = 5;
-    memcpy(decimus.skills, enemy_skills, sizeof(enemy_skills));
-    battle1(player, &decimus);
+    Enemy cult;
+    Enemy mercenaries;
+    Enemy Sulla;
+    Scenario rome;
+    Scenario shadows_of_pompeii;
+    Scenario thermal_baths;
+    Scenario colosseum_showdown;
+    init_enemy(&decimus, "Decimus Brutus", 80, 4, 5);
+    init_enemy(&cult, "Cult of Bacchus", 90, 5, 5);
+    init_enemy(&mercenaries, "The Mercenaries", 100, 5, 6);
+    init_enemy(&Sulla, "Lucius Cornelius Sulla", 120, 6, 6);
+    init_scenario(&rome, "Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &decimus, &rome_dec, &shadows_of_pompeii);
+    init_scenario(&shadows_of_pompeii, "Shadows of Pompeii", "In the twilight of Pompeii's ruins, mysteries lurk beneath ash-covered streets. Navigate shadows fraught with intrigue and danger. Will you unravel secrets or become entangled in deceit? Choose wisely; in Pompeii, history's whispers echo loudest", &cult, &pompeii_dec, &thermal_baths);
+    init_scenario(&thermal_baths, "The Thermal Baths", "After the tumultuous events in Pompeii, you seek respite and refuge in the tranquil surroundings of the thermal baths. Here, amidst the soothing waters and opulent surroundings, you contemplate your next move in the ever-shifting game of power and intrigue.", &mercenaries, &thermal_dec, &colosseum_showdown);
+    init_scenario(&colosseum_showdown, "The Colosseum Showdown", "Whatever happens, you end up detained at the hands of the praetorian guard. You are brought back to Rome where a trial is set to begin. After a couple of sessions, it is already clear that the magistrate, the Optimate Dictator Lucius Cornelius Sulla, wants to condemn you whatever the cost may be, and that the sentence is likely set from the beginning of the trial: death at the Tarpeian Rock!", &Sulla, &colosseum_dec, NULL);
+    ScenarioQueue q;
+    init_scene_queue(&q);
+    enqueue_scenario(&q, &rome);
+    enqueue_scenario(&q, &shadows_of_pompeii);
+    enqueue_scenario(&q, &thermal_baths);
+    enqueue_scenario(&q, &colosseum_showdown);
+    game(&q, player);
 }
 
 
