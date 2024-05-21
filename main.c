@@ -54,14 +54,14 @@ void configure_character(Character *player) {
             player->HP = 100;
             player->atk_pts = 5;
             player->def_pts = 5;
-            memcpy(player->skills, hero_skills, sizeof(hero_skills));
+            //memcpy(player->skills, hero_skills, sizeof(hero_skills));
             break;
         case 2:
             strcpy(player->name, "Ericus Carpophorus");    
             player->HP = 100;
             player->atk_pts = 4;
             player->def_pts = 6;
-            memcpy(player->skills, hero_skills, sizeof(hero_skills));
+           // memcpy(player->skills, hero_skills, sizeof(hero_skills));
             
             break;
         case 3:
@@ -70,7 +70,7 @@ void configure_character(Character *player) {
             player->HP = 100;
             player->atk_pts = 7;
             player->def_pts = 3;
-            memcpy(player->skills, hero_skills, sizeof(hero_skills));
+          //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
             
             break;
         default:
@@ -79,7 +79,7 @@ void configure_character(Character *player) {
             player->HP = 100;
             player->atk_pts = 5;
             player->def_pts = 5;
-            memcpy(player->skills, hero_skills, sizeof(hero_skills));
+         //   memcpy(player->skills, hero_skills, sizeof(hero_skills));
             
             break;
     }
@@ -112,6 +112,104 @@ void start_game(Character *player){
     game(&q, player);
 }
 
+void configure_skills(Character* player){
+    int choice;
+    int already_chosen=0;
+    printf("\n\nSelect 2 skills which you will use throughout the game!\n");
+    for(int i=0; i<2; i++){
+        if(already_chosen!=1){
+        printf("1. %s\n", hero_skills[0].name);
+        printf("   * HP modifier: %.2f\n", hero_skills[0].mod_hp);
+        printf("   * Attack Points: %.2f\n", hero_skills[0].mod_atk);
+        printf("   * Defense Points: %.2f\n", hero_skills[0].mod_def);}
+        if(already_chosen!=2){
+        printf("2. %s\n", hero_skills[1].name);
+        printf("   * HP modifier: %.2f\n", hero_skills[1].mod_hp);
+        printf("   * Attack Points: %.2f\n", hero_skills[1].mod_atk);
+        printf("   * Defense Points: %.2f\n", hero_skills[1].mod_def);}
+        if(already_chosen!=3){
+        printf("3. %s\n", hero_skills[2].name);
+        printf("   * HP modifier: %.2f\n", hero_skills[2].mod_hp);
+        printf("   * Attack Points: %.2f\n", hero_skills[2].mod_atk);
+        printf("   * Defense Points: %.2f\n\n", hero_skills[2].mod_def);}
+        printf("Choose your skill number %d/2\n", (i+1));
+        scanf("%d", &choice);
+        if(choice==already_chosen){choice=4;}
+        switch (choice) {
+            case 1:
+                player->skills[i]=hero_skills[choice-1];
+                already_chosen=1;
+                printf("You have chosen: %s\n\n", player->skills[i]);
+                //memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                break;
+            case 2:
+                player->skills[i]=hero_skills[choice-1];
+            // memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                already_chosen=2;
+                printf("You have chosen: %s\n\n", player->skills[i]);
+                break;
+            case 3:
+                player->skills[i]=hero_skills[choice-1];
+            //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                already_chosen=3;
+                printf("You have chosen: %s\n\n", player->skills[i]);
+                break;
+            default:
+                printf("Invalid choice.\n");
+                i--;
+            //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                break;
+        }}
+        bool check=false;
+        while(!check){printf("Weapon selection:\n");
+        printf("1. %s\n", weapons[0].name);
+        printf("   * HP modifier: %.2f\n", weapons[0].mod_hp);
+        printf("   * Attack Points: %.2f\n", weapons[0].mod_atk);
+        printf("   * Defense Points: %.2f\n", weapons[0].mod_def);
+        printf("2. %s\n", weapons[1].name);
+        printf("   * HP modifier: %.2f\n", weapons[1].mod_hp);
+        printf("   * Attack Points: %.2f\n", weapons[1].mod_atk);
+        printf("   * Defense Points: %.2f\n", weapons[1].mod_def);
+        printf("3. %s\n", weapons[2].name);
+        printf("   * HP modifier: %.2f\n", weapons[2].mod_hp);
+        printf("   * Attack Points: %.2f\n", weapons[2].mod_atk);
+        printf("   * Defense Points: %.2f\n\n", weapons[2].mod_def);
+
+        printf("Choose your weapon:\n");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                player->skills[2]=weapons[choice-1];
+                check=true;
+                printf("You have chosen: %s\n\n", player->skills[2]);
+                //memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                break;
+            case 2:
+                player->skills[2]=weapons[choice-1];
+                check=true;
+                printf("You have chosen: %s\n\n", player->skills[2]);
+            // memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                
+                break;
+            case 3:
+                player->skills[2]=weapons[choice-1];
+                check=true;
+                printf("You have chosen: %s\n\n", player->skills[2]);
+            //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                
+                break;
+            default:
+                printf("Invalid choice.\n");
+                break;}
+            printf("You also get 2 special skills which can only be used ONCE throughout the game! These will be:\n");
+            player->skills[3]=special_skills[0];
+            player->skills[4]=special_skills[1];
+            printf("· %s\n· %s\n\n\n", player->skills[3].name, player->skills[4].name);
+        }}
+
+
+
 
 void display_menu(Character *player) {
     int choice;
@@ -138,6 +236,7 @@ void display_menu(Character *player) {
                 break;
             case 2:
                 configure_character(player); //this is the function that configures the players character
+                configure_skills(player);
                 chosen_character = true;
                 break;
             case 3:

@@ -265,14 +265,23 @@ Chapter dequeue_scenario(ScenarioQueue* q) {
 }
 
 
-Skill hero_skills[5] = {
+Skill weapons[3] = {
+        {"Shield", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", true, 10, 5, 5},
+        {"Bow and Arrow", "Use your youth and agility to surprise your enemy and dodge the enemy (extra defence). Note that this attack works well against certain types of enemies.", true, 5, 10, 5},
+        {"Hammer", "You picture the emperor (he who is responsible for the death of your loved ones) as your enemy, you go crazy and inflict lots of damage on your enemy. Note that this attack works well against certain types of enemies.", true, 15, 0, 0}
+};
+
+
+Skill hero_skills[3] = {
         {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", true, 10, 5, 5},
         {"Agile Attack", "Use your youth and agility to surprise your enemy and dodge the enemy (extra defence). Note that this attack works well against certain types of enemies.", true, 5, 10, 5},
         {"Berserk", "You picture the emperor (he who is responsible for the death of your loved ones) as your enemy, you go crazy and inflict lots of damage on your enemy. Note that this attack works well against certain types of enemies.", true, 15, 0, 0},
-        {"Heal", "Use your medicinal knowledge to heal yourself (+100 HP). Note that this ability can only be used once.", true, 0, 0, 100},
-        {"Time Strike", "Time Strike /***********ADD DESCRIPT************/ Note that this ability can only be used once.", true, 0, 0, 0}
-    };
+        };
 
+Skill special_skills[2] = {
+        {"Regenerate", "Use your medicinal knowledge to heal yourself (+100 HP). Note that this ability can only be used once.", true, 0, 0, 100},
+        {"Time Strike", "Time Strike /***********ADD DESCRIPT************/ Note that this ability can only be used once.", true, 0, 0, 0}
+};
 // cambiar les skills que hi han aqui
 Skill enemy_skills[3] = {
         {"Deceit Attack", "Use your deception skills to inflict sudden damage to your enemy. Note that this attack works well against certain types of enemies.", false, 10, 0, 0},
