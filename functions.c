@@ -46,3 +46,75 @@ void init_scenario(Scenario* scene, char* name, char* descript, Enemy* enemy, De
 }
 
 
+// Queue for the turns
+
+typedef struct Turn {    // We will use this as the nodes in the scenario queues
+    int which_player;
+    struct Turn *next;
+} Turn;
+
+// Queue
+typedef struct {
+    Turn *head;
+    Turn *tail;
+    int elements;
+} TurnQueue;
+
+void init_turn_queue(TurnQueue* q){
+    q->head=NULL;
+    q->tail=NULL;
+    q->elements=0;
+}
+
+void enqueue_turn(TurnQueue* q, int player_move){
+    q->elements+=1;
+
+    Turn *node = (Turn *)malloc(sizeof(Turn));
+    if (node == NULL) {
+        // Handle memory allocation failure
+        return;
+    }
+
+    // Initialize the new node
+    node->which_player = player_move;
+    node->next = NULL;
+
+    // If the queue is empty, set head to the new node
+    if (q->tail == NULL) {
+        q->head = node;
+    } else {
+        // Link the new node to the end of the queue
+        q->tail->next = node;
+    }
+
+    // Update the tail pointer to the new node
+    q->tail = node;
+
+}
+
+int dequeue_turn(TurnQueue* q) {
+    Turn *temp= (Turn *)malloc(sizeof(Turn));
+;
+    // Check if the queue is empty
+    if (q->head == NULL) {
+        // Queue is empty, nothing to dequeue
+        return temp->which_player;
+    }
+
+    // Store the current head node in a temporary variable
+    temp = q->head;
+
+    // Move the head pointer to the next node
+    q->head = q->head->next;
+
+    // If the queue is now empty, update the tail to NULL as well
+    if (q->head == NULL) {
+        q->tail = NULL;
+    }
+
+    // Decrease the count of elements in the queue
+    q->elements -= 1;
+
+    // Return the first turn
+    return temp->which_player;
+}

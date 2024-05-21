@@ -28,7 +28,6 @@ void init_decision(Decision* decision, char* question, int num_options, Option* 
 
 */
 
-
 void configure_character(Character *player) {
     printf("Character selection:\n");
     printf("1. Arnaus Decimus Meridius\n");
