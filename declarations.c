@@ -13,12 +13,13 @@ Character c2 = {"Ericus Carpophorus", 100, 0.9, 1.1}; // Ericus Carpophorus
 Character c3 = {"Paullus Acilius Glabrio", 100, 1.2, 0.8}; // Paullus Acilius Glabrio
 
 // Initialize enemies
+/*
 Enemy decimus = {"Decimus Brutus", 80, 0.4, 0.5, skills}; //cambiar pq no puguin fer servir totes les skills
 Enemy cult = {"Cult of Bacchus", 90, 0.7, 0.6, skills};
 Enemy mercenaries = {"The Mercenaries", 100, 0.7, 0.9, skills};
-Enemy Sulla = {"Lucius Cornelius Sulla", 120, 1, 1.1, skills};
+Enemy Sulla = {"Lucius Cornelius Sulla", 120, 1, 1.1, skills}; */
 
-
+/*
 
 // Initialize options
 Option opt1_rome = {"Forge Alliances", "You form alliances with other gladiators, pooling your strengths to overcome rivals together.", "Your alliances prove beneficial, leading to an increase in your characters attack points by 1.", 0, 0.1, 0};
@@ -57,3 +58,6 @@ Scenario thermal_baths = {"The Thermal Baths", "After the tumultuous events in P
 Scenario shadows_of_pompeii = {"Shadows of Pompeii", "In the twilight of Pompeii's ruins, mysteries lurk beneath ash-covered streets. Navigate shadows fraught with intrigue and danger. Will you unravel secrets or become entangled in deceit? Choose wisely; in Pompeii, history's whispers echo loudest", &cult, &pompeii_dec, &thermal_baths};
 
 Scenario rome = {"Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &decimus, &rome_dec, &shadows_of_pompeii};
+
+
+*/

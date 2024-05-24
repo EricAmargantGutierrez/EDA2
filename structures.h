@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
+#define MAX_LENGTH 50
+#define MAX_ITEMS 5
 
 
 // Define constants
@@ -18,17 +20,76 @@ typedef struct {
     float mod_hp;
 } Skill;
 
+// Dictionary structs
+typedef struct {
+    char key[MAX_LENGTH];
+    int value;
+} Entry;
+
+typedef struct {
+    Entry entries[MAX_ITEMS];
+    int size;
+} Dictionary;
+
 typedef struct {
     char name[50];
     float HP;
     float atk_pts;
     float def_pts;
     Skill skills[5];
+    Dictionary dict;
 } Character;
+
+
+void insert(Character *player, const char *key, int value) {
+    if (player->dict.size >= MAX_ITEMS) {
+        printf("Dictionary is full\n");
+        return;
+    }
+
+    // Check for duplicate keys and update value if found
+    for (int i = 0; i < player->dict.size; i++) {
+        if (strncmp(player->dict.entries[i].key, key, MAX_LENGTH) == 0) {
+            player->dict.entries[i].value = value;
+            return;
+        }
+    }
+
+    // Otherwise, insert the new key-value pair
+    strncpy(player->dict.entries[player->dict.size].key, key, MAX_LENGTH - 1);
+    player->dict.entries[player->dict.size].key[MAX_LENGTH - 1] = '\0'; // Ensure null-termination
+    player->dict.entries[player->dict.size].value = value;
+    player->dict.size++;
+}
+
+void init_dictionary(Character *player) {
+    player->dict.size = 0;
+}
+
+int get(Character *player, const char *key) {
+    for (int i = 0; i < player->dict.size; i++) {
+        if (strncmp(player->dict.entries[i].key, key, MAX_LENGTH) == 0) {
+            return player->dict.entries[i].value;
+        }
+    }
+    return -1; // Key not found
+}
+
+
+void increment(Character *player, const char *key) {
+    for (int i = 0; i < player->dict.size; i++) {
+        if (strncmp(player->dict.entries[i].key, key, MAX_LENGTH) == 0) {
+            player->dict.entries[i].value += 1;
+            return;
+        }
+    }
+    printf("Key '%s' not found in dictionary\n", key);
+}
 
 typedef struct {
     char name[50];
     float hp;
+    float initial_hp;
     float atk;
     float def;
     Skill skills[3]; //enemies cannot heal themselves
@@ -53,7 +114,10 @@ typedef struct  scen {
     char description[400];
     Enemy *enemies;
     Decision *choice;
+    int life;
+    int order;
     struct scen *next;
+    struct scen *prev;
 } Scenario;
 
 
@@ -263,6 +327,7 @@ Chapter dequeue_scenario(ScenarioQueue* q) {
     // Return the first turn
     return *temp;
 }
+
 
 
 Skill weapons[3] = {

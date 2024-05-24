@@ -4,30 +4,6 @@
 #include <string.h>
 #include "battles.c"
 
-/*
-void init_skills(Skill *ability, char* name, char* descript, bool type, int atk, int def, int hp){
-    strcpy(ability->name, name);    
-    strcpy(ability->description, descript);
-    ability->type=type;
-    ability->mod_atk=atk;
-    ability->mod_def=def;
-    ability->mod_hp=hp;
-}
-
-void init_option(Option* option, char* initial_text, char* response, char* final_text){
-    strcpy(option->narrative_text_i, initial_text);    
-    strcpy(option->response_text, response);
-    strcpy(option->narrative_text_f, final_text);
-}
-
-void init_decision(Decision* decision, char* question, int num_options, Option* options){
-    strcpy(decision->question_text, question);
-    decision->number_options = num_options;
-    decision->options = options; //change if it doesnt work
-}
-
-*/
-
 
 void configure_character(Character *player) {
     printf("Character selection:\n");
@@ -86,7 +62,7 @@ void configure_character(Character *player) {
 }
 
 
-void start_game(Character *player){
+void start_game(Character *player, bool load_scenario){
     Enemy decimus;
     Enemy cult;
     Enemy mercenaries;
@@ -99,17 +75,30 @@ void start_game(Character *player){
     init_enemy(&cult, "Cult of Bacchus", 90, 5, 5);
     init_enemy(&mercenaries, "The Mercenaries", 100, 5, 6);
     init_enemy(&Sulla, "Lucius Cornelius Sulla", 120, 6, 6);
-    init_scenario(&rome, "Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &decimus, &rome_dec, &shadows_of_pompeii);
-    init_scenario(&shadows_of_pompeii, "Shadows of Pompeii", "In the twilight of Pompeii's ruins, mysteries lurk beneath ash-covered streets. Navigate shadows fraught with intrigue and danger. Will you unravel secrets or become entangled in deceit? Choose wisely; in Pompeii, history's whispers echo loudest", &cult, &pompeii_dec, &thermal_baths);
-    init_scenario(&thermal_baths, "The Thermal Baths", "After the tumultuous events in Pompeii, you seek respite and refuge in the tranquil surroundings of the thermal baths. Here, amidst the soothing waters and opulent surroundings, you contemplate your next move in the ever-shifting game of power and intrigue.", &mercenaries, &thermal_dec, &colosseum_showdown);
-    init_scenario(&colosseum_showdown, "The Colosseum Showdown", "Whatever happens, you end up detained at the hands of the praetorian guard. You are brought back to Rome where a trial is set to begin. After a couple of sessions, it is already clear that the magistrate, the Optimate Dictator Lucius Cornelius Sulla, wants to condemn you whatever the cost may be, and that the sentence is likely set from the beginning of the trial: death at the Tarpeian Rock!", &Sulla, &colosseum_dec, NULL);
-    ScenarioQueue q;
-    init_scene_queue(&q);
-    enqueue_scenario(&q, &rome);
-    enqueue_scenario(&q, &shadows_of_pompeii);
-    enqueue_scenario(&q, &thermal_baths);
-    enqueue_scenario(&q, &colosseum_showdown);
-    game(&q, player);
+    init_scenario(&rome, "Rome", "In the heart of ancient Rome, your journey begins. In a context of post-civil war between the Optimates and Populares factions in the senate, the roman plebs live under the yoke of Optimate tyranny, and the Dictatorship of Lucius Cornelius Sulla. Navigate the streets wisely, for every choice shapes your destiny. Adventure awaits in the arena and beyond. Let the games begin! \n\n", &decimus, &rome_dec, &shadows_of_pompeii, NULL, 1);
+    init_scenario(&shadows_of_pompeii, "Shadows of Pompeii", "In the twilight of Pompeii's ruins, mysteries lurk beneath ash-covered streets. Navigate shadows fraught with intrigue and danger. Will you unravel secrets or become entangled in deceit? Choose wisely; in Pompeii, history's whispers echo loudest", &cult, &pompeii_dec, &thermal_baths, &rome, 2);
+    init_scenario(&thermal_baths, "The Thermal Baths", "After the tumultuous events in Pompeii, you seek respite and refuge in the tranquil surroundings of the thermal baths. Here, amidst the soothing waters and opulent surroundings, you contemplate your next move in the ever-shifting game of power and intrigue.", &mercenaries, &thermal_dec, &colosseum_showdown, &shadows_of_pompeii, 3);
+    init_scenario(&colosseum_showdown, "The Colosseum Showdown", "Whatever happens, you end up detained at the hands of the praetorian guard. You are brought back to Rome where a trial is set to begin. After a couple of sessions, it is already clear that the magistrate, the Optimate Dictator Lucius Cornelius Sulla, wants to condemn you whatever the cost may be, and that the sentence is likely set from the beginning of the trial: death at the Tarpeian Rock!", &Sulla, &colosseum_dec, NULL, &thermal_baths, 4);
+    Scenario* scen = &rome;
+    if(load_scenario){
+        load_game(scen);
+        printf("Tis the remix %s\n", scen->name);
+    }
+    game(scen, player);
+    for(int i=0; i<5; i++){
+        printf("%s has been used %d times\n", player->skills[i].name, get(player, player->skills[i].name));
+    }
+    printf("\n\n");
+    char **sorted_keys = get_sorted_keys(player);
+    if (sorted_keys) {
+        printf("\nSorted keys based on values:\n");
+        for (int i = 0; i < player->dict.size; i++) {
+            printf("%d.\t%s\n", (i+1), sorted_keys[i]);
+            free(sorted_keys[i]); // Free each allocated string
+        }
+        free(sorted_keys); // Free the array itself
+    }
+
 }
 
 void configure_skills(Character* player){
@@ -141,18 +130,22 @@ void configure_skills(Character* player){
                 already_chosen=1;
                 printf("You have chosen: %s\n\n", player->skills[i]);
                 //memcpy(player->skills, hero_skills, sizeof(hero_skills));
-                break;
+                    
+                    insert(player, player->skills[i].name, 0);
+                    break;
             case 2:
                 player->skills[i]=hero_skills[choice-1];
             // memcpy(player->skills, hero_skills, sizeof(hero_skills));
                 already_chosen=2;
                 printf("You have chosen: %s\n\n", player->skills[i]);
+                insert(player, player->skills[i].name, 0);
                 break;
             case 3:
                 player->skills[i]=hero_skills[choice-1];
             //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
                 already_chosen=3;
                 printf("You have chosen: %s\n\n", player->skills[i]);
+                insert(player, player->skills[i].name, 0);
                 break;
             default:
                 printf("Invalid choice.\n");
@@ -184,20 +177,21 @@ void configure_skills(Character* player){
                 check=true;
                 printf("You have chosen: %s\n\n", player->skills[2]);
                 //memcpy(player->skills, hero_skills, sizeof(hero_skills));
+                insert(player, player->skills[2].name, 0);
+                
                 break;
             case 2:
                 player->skills[2]=weapons[choice-1];
                 check=true;
                 printf("You have chosen: %s\n\n", player->skills[2]);
             // memcpy(player->skills, hero_skills, sizeof(hero_skills));
-                
+                insert(player, player->skills[2].name, 0);                
                 break;
             case 3:
                 player->skills[2]=weapons[choice-1];
                 check=true;
                 printf("You have chosen: %s\n\n", player->skills[2]);
-            //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
-                
+                insert(player, player->skills[2].name, 0);                
                 break;
             default:
                 printf("Invalid choice.\n");
@@ -205,6 +199,8 @@ void configure_skills(Character* player){
             printf("You also get 2 special skills which can only be used ONCE throughout the game! These will be:\n");
             player->skills[3]=special_skills[0];
             player->skills[4]=special_skills[1];
+            insert(player, player->skills[3].name, 0);
+            insert(player, player->skills[4].name, 0);                
             printf("· %s\n· %s\n\n\n", player->skills[3].name, player->skills[4].name);
         }}
 
@@ -221,9 +217,9 @@ void display_menu(Character *player) {
         printf("2. Configure Character before playing\n");
         printf("3. View Game Structure\n");
         printf("4. Exit\n");
+        printf("5. Load Game\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
-
 
         switch (choice) {
             case 1:
@@ -232,7 +228,7 @@ void display_menu(Character *player) {
                     choice = 2;
                     break;
                 }
-                start_game(player); //this is the function that leads character through the different scenarios in the game
+                start_game(player, false); //this is the function that leads character through the different scenarios in the game
                 break;
             case 2:
                 configure_character(player); //this is the function that configures the players character
@@ -250,6 +246,10 @@ void display_menu(Character *player) {
             case 4:
                 printf("Exiting the game. Guess you couldn't handle the pressure!\n");
                 break;
+            case 5:
+                printf("Loading Game...\n");
+                start_game(player, true);
+                break;
             default:
                 printf("Invalid choice. Please enter a valid option.\n");
         }
@@ -258,5 +258,6 @@ void display_menu(Character *player) {
 
 void main(){
     Character player;
+    init_dictionary(&player);
     display_menu(&player);
 }
