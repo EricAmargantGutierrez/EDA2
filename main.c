@@ -5,7 +5,12 @@
 #include "battles.c"
 
 
-void configure_character(Character *player) {
+void configure_character(Character *player, int charact) {
+    int choice;
+    if(charact!=-1){
+        choice=charact;
+        }
+    else{
     printf("Character selection:\n");
     printf("1. Arnaus Decimus Meridius\n");
     printf("   * HP: 100\n");
@@ -20,9 +25,9 @@ void configure_character(Character *player) {
     printf("   * Attack Points: 6\n");
     printf("   * Defense Points: 4\n");
 
-    int choice;
     printf("Choose your character (1, 2, or 3): ");
     scanf("%d", &choice);
+}
 
     switch (choice) {
         case 1:
@@ -30,15 +35,14 @@ void configure_character(Character *player) {
             player->HP = 100;
             player->atk_pts = 5;
             player->def_pts = 5;
-            //memcpy(player->skills, hero_skills, sizeof(hero_skills));
+            player->character_num = 1;
             break;
         case 2:
             strcpy(player->name, "Ericus Carpophorus");    
             player->HP = 100;
             player->atk_pts = 4;
             player->def_pts = 6;
-           // memcpy(player->skills, hero_skills, sizeof(hero_skills));
-            
+            player->character_num = 2;
             break;
         case 3:
             
@@ -46,8 +50,7 @@ void configure_character(Character *player) {
             player->HP = 100;
             player->atk_pts = 7;
             player->def_pts = 3;
-          //  memcpy(player->skills, hero_skills, sizeof(hero_skills));
-            
+            player->character_num = 3;
             break;
         default:
             printf("Invalid choice. Defaulting to Arnaus Decimus Meridius.\n");
@@ -55,8 +58,7 @@ void configure_character(Character *player) {
             player->HP = 100;
             player->atk_pts = 5;
             player->def_pts = 5;
-         //   memcpy(player->skills, hero_skills, sizeof(hero_skills));
-            
+            player->character_num = 1;
             break;
     }
 }
@@ -81,10 +83,22 @@ void start_game(Character *player, bool load_scenario){
     init_scenario(&colosseum_showdown, "The Colosseum Showdown", "Whatever happens, you end up detained at the hands of the praetorian guard. You are brought back to Rome where a trial is set to begin. After a couple of sessions, it is already clear that the magistrate, the Optimate Dictator Lucius Cornelius Sulla, wants to condemn you whatever the cost may be, and that the sentence is likely set from the beginning of the trial: death at the Tarpeian Rock!", &Sulla, &colosseum_dec, NULL, &thermal_baths, 4);
     Scenario* scen = &rome;
     if(load_scenario){
-        load_game(scen);
-        printf("Tis the remix %s\n", scen->name);
+        // incr, character_num
+        scen = load_game(scen, player);
+        // normal data
+        configure_character(player, player->character_num);
+        player->skills[0]=hero_skills[player->first_skill];
+        player->skills[1]=hero_skills[player->second_skill];
+        player->skills[2]=weapons[player->weapon];
+        player->skills[3]=special_skills[0];
+        player->skills[4]=special_skills[1];
+        insert(player, player->skills[0].name, 0);
+        insert(player, player->skills[1].name, 0);
+        insert(player, player->skills[2].name, 0);
+        insert(player, player->skills[3].name, 0);
+        insert(player, player->skills[4].name, 0);
     }
-    game(scen, player);
+    game(scen, player, load_scenario);
     for(int i=0; i<5; i++){
         printf("%s has been used %d times\n", player->skills[i].name, get(player, player->skills[i].name));
     }
@@ -129,16 +143,27 @@ void configure_skills(Character* player){
                 player->skills[i]=hero_skills[choice-1];
                 already_chosen=1;
                 printf("You have chosen: %s\n\n", player->skills[i]);
-                //memcpy(player->skills, hero_skills, sizeof(hero_skills));
-                    
-                    insert(player, player->skills[i].name, 0);
-                    break;
+                //memcpy(player->skills, hero_skills, sizeof(hero_skills)); 
+                insert(player, player->skills[i].name, 0);
+                if(i==0){
+                    player->first_skill=choice-1;
+                }
+                else if(i==1){
+                    player->second_skill=choice-1;
+                }
+                break;
             case 2:
                 player->skills[i]=hero_skills[choice-1];
             // memcpy(player->skills, hero_skills, sizeof(hero_skills));
                 already_chosen=2;
                 printf("You have chosen: %s\n\n", player->skills[i]);
                 insert(player, player->skills[i].name, 0);
+                if(i==0){
+                    player->first_skill=choice-1;
+                }
+                else if(i==1){
+                    player->second_skill=choice-1;
+                }
                 break;
             case 3:
                 player->skills[i]=hero_skills[choice-1];
@@ -146,6 +171,12 @@ void configure_skills(Character* player){
                 already_chosen=3;
                 printf("You have chosen: %s\n\n", player->skills[i]);
                 insert(player, player->skills[i].name, 0);
+                if(i==0){
+                    player->first_skill=choice-1;
+                }
+                else if(i==1){
+                    player->second_skill=choice-1;
+                }
                 break;
             default:
                 printf("Invalid choice.\n");
@@ -178,20 +209,22 @@ void configure_skills(Character* player){
                 printf("You have chosen: %s\n\n", player->skills[2]);
                 //memcpy(player->skills, hero_skills, sizeof(hero_skills));
                 insert(player, player->skills[2].name, 0);
-                
+                player->weapon=choice-1;
                 break;
             case 2:
                 player->skills[2]=weapons[choice-1];
                 check=true;
                 printf("You have chosen: %s\n\n", player->skills[2]);
             // memcpy(player->skills, hero_skills, sizeof(hero_skills));
-                insert(player, player->skills[2].name, 0);                
+                insert(player, player->skills[2].name, 0); 
+                player->weapon=choice-1;               
                 break;
             case 3:
                 player->skills[2]=weapons[choice-1];
                 check=true;
                 printf("You have chosen: %s\n\n", player->skills[2]);
-                insert(player, player->skills[2].name, 0);                
+                insert(player, player->skills[2].name, 0);  
+                player->weapon=choice-1;              
                 break;
             default:
                 printf("Invalid choice.\n");
@@ -202,7 +235,10 @@ void configure_skills(Character* player){
             insert(player, player->skills[3].name, 0);
             insert(player, player->skills[4].name, 0);                
             printf("· %s\n· %s\n\n\n", player->skills[3].name, player->skills[4].name);
-        }}
+        }
+        
+        
+        }
 
 
 
@@ -224,14 +260,13 @@ void display_menu(Character *player) {
         switch (choice) {
             case 1:
                 if(chosen_character == false){
-                    printf("Since you have not configured your character yet, you will be redirected to 'Configure Character'");
-                    choice = 2;
+                    printf("You have not configured your character yet. Go to '2. Configure Character'");
                     break;
                 }
                 start_game(player, false); //this is the function that leads character through the different scenarios in the game
                 break;
             case 2:
-                configure_character(player); //this is the function that configures the players character
+                configure_character(player, -1); //this is the function that configures the players character
                 configure_skills(player);
                 chosen_character = true;
                 break;
@@ -248,7 +283,8 @@ void display_menu(Character *player) {
                 break;
             case 5:
                 printf("Loading Game...\n");
-                start_game(player, true);
+                Character loaded_player;
+                start_game(&loaded_player, true);
                 break;
             default:
                 printf("Invalid choice. Please enter a valid option.\n");

@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
-#include "outside.c"
+#include "structures.h"
 
 void Enqueue_Battle(BattleQueue *queue, Character *character, Enemy* enemy) {
     // Create a new node
@@ -175,4 +175,12 @@ char** get_sorted_keys(Character* player) {
     }
 
     return sorted_keys;
+}
+
+// Function to print information of a player (Character)
+void print_player_info(Character* player) {
+    printf("Player Name: %s\n", player->name);
+    printf("Player Attack Points: %.2f\n", player->atk_pts);
+    printf("Player HP: %.2f\n", player->HP);
+    printf("Player Defense Points: %.2f\n\n", player->def_pts);
 }

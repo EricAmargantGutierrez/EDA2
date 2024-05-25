@@ -68,12 +68,16 @@ bool battle(Character* player, Scenario* scen){
     srand(time(NULL));
     printf("FIGHT:\t%s VS %s \n\n", enemy->name, player->name);
     printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
+    bool next_turn=true;
+    int current_turn = 1;
     while (enemy->hp > 0.0 && player->HP > 0.0 && turns.elements>0){
     int move=0;
     // Read the integer input from the user
-    int check=0;
-    int current_turn=dequeue_turn(&turns);
-
+    if(next_turn){
+        current_turn = dequeue_turn(&turns);
+        printf("%d\n", current_turn);
+        next_turn=false;
+        }
     if(current_turn==1){
     printf("Player's Turn \n\n");
     printf("1. %s\n2. %s\n3. %s\n", player->skills[0].name, player->skills[1].name, player->skills[2].name);
@@ -81,7 +85,7 @@ bool battle(Character* player, Scenario* scen){
     if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].name);}
     printf("6. Info\n");
     printf("7. Save game\n\n...\n");
-    check=scanf("%d", &move);
+    scanf("%d", &move);
     float enemy_attack;
     // Use a do-while loop to make sure the input is correct
     switch (move) {
@@ -95,6 +99,7 @@ bool battle(Character* player, Scenario* scen){
             increment(player, player->skills[move-1].name);
             //enemy's turn
             printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
+            next_turn=true;
             break;
         case 2:
             // Call function to inflict damage on the enemy
@@ -106,6 +111,7 @@ bool battle(Character* player, Scenario* scen){
             increment(player, player->skills[move-1].name);
             //enemy's turn
             printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
+            next_turn=true;
             break;
         case 3:
             // Call function to inflict damage on the enemy
@@ -117,6 +123,7 @@ bool battle(Character* player, Scenario* scen){
             increment(player, player->skills[move-1].name);
             //enemy's turn
             printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
+            next_turn=true;
             break;
         case 4:
             if(!player->skills[3].can_be_used){
@@ -131,6 +138,7 @@ bool battle(Character* player, Scenario* scen){
             push_battle_move(&stack, move, player);
             printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
             player->skills[3].can_be_used=false;
+            next_turn=true;
             break;
         case 5:
             if(!player->skills[4].can_be_used){
@@ -170,28 +178,30 @@ bool battle(Character* player, Scenario* scen){
             enqueue_battle_move(&q, move, player);
             player->skills[4].can_be_used=false;
             printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
+            next_turn=true;
             break;
         case 6:
+            print_player_info(player);
             printf("1. %s\n2. %s\n3. %s\n", player->skills[0].description, player->skills[1].description, player->skills[2].description);
             if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].description);}
             if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].description);}
-            enqueue_turn(&turns, 1); //because the turn wasn't used before
+            next_turn = false;
             break;
         case 7:
-            enqueue_turn(&turns, 1); //because the turn wasn't used before
             save_game(scen, player);
+            next_turn = false;
             break;
         default:
             printf("Invalid choice. Please enter a valid option. (Your blunder lost you a turn)\n");
             break;
     }}
-    else{
+    if(current_turn==0){
         printf("%s's Turn:\n\n", enemy->name);
         // Enemy counter_attack
         int enemy_attack=rand()%3;
         counter_Attack(enemy, player, enemy_attack, move);
         printf("HP:\t%s: %.2f \t%s: %.2f \n", enemy->name, enemy->hp, player->name, player->HP);
-        
+        next_turn=true;
     }
 
     if(player->HP<0 || turns.elements<0){
@@ -218,27 +228,27 @@ void print_enemy_info(Enemy* enemy) {
     printf("Enemy Defense: %d\n", enemy->def);
 }
 
-// Function to print information of a player (Character)
-void print_player_info(Character* player) {
-    printf("Player Name: %s\n", player->name);
-    printf("Player Attack Points: %.2f\n", player->atk_pts);
-    printf("Player HP: %.2f\n", player->HP);
-    printf("Player Defense Points: %.2f\n\n", player->def_pts);
-}
-
-void implement_option(Character* player, Scenario* scene){
-    int choice;
+void implement_option(Character* player, Scenario* scene, int prev_choice){
+    int choice=0;
     bool valid_input=false;
     do{
-    printf("%s\n\n", scene->choice->question_text);
+    if(prev_choice==-1){printf("%s\n\n", scene->choice->question_text);
     printf("1. %s\n", scene->choice->options[0]->narrative_text_i);
     printf("2. %s\n", scene->choice->options[1]->narrative_text_i);
     printf("3. Info\n\n");    
     scanf("%d", &choice);
+    choice--;
+    }
+    else{
+        //choice=prev_choice;
+        printf("LOL");
+        choice=0;
+    }
     switch (choice) {
-            case 1:
+            case 0:
                 printf("%s\n\n", scene->choice->options[0]->response_text);
                 printf("%s\n\n", scene->choice->options[0]->narrative_text_f);
+                scene->choice->option_number=0;
                 printf("New stats:\n");
                 printf("Player Attack Points: %.2f + (%.2f)\n", player->atk_pts, scene->choice->options[0]->atk_incr);
                 printf("Player Defense Points: %.2f + (%.2f)\n\n", player->def_pts, scene->choice->options[0]->def_incr);
@@ -248,9 +258,10 @@ void implement_option(Character* player, Scenario* scene){
                 player->HP+=scene->choice->options[0]->hp_incr;
                 valid_input=true;
                 break;
-            case 2:
+            case 1:
                 printf("%s\n\n", scene->choice->options[1]->response_text);
                 printf("%s\n\n", scene->choice->options[1]->narrative_text_f);
+                scene->choice->option_number=1;
                 printf("New stats:\n");                
                 printf("Player Attack Points: %.2f + (%.2f)\n", player->atk_pts, scene->choice->options[1]->atk_incr);
                 printf("Player Defense Points: %.2f + (%.2f)\n\n", player->def_pts, scene->choice->options[1]->def_incr);
@@ -260,7 +271,7 @@ void implement_option(Character* player, Scenario* scene){
                 player->HP+=scene->choice->options[1]->hp_incr;
                 valid_input=true;
                 break;
-            case 3:
+            case 2:
                 print_player_info(player);
                 printf("Choice 1:\n\tAttack increment:\t%.2f\n\tDefensive increment:\t%.2f\n\tHP increment:\t%.2f\n", scene->choice->options[0]->atk_incr, scene->choice->options[0]->def_incr, scene->choice->options[0]->hp_incr);
                 printf("Choice 2:\n\tAttack increment:\t%.2f\n\tDefensive increment:\t%.2f\n\tHP increment:\t%.2f\n\n", scene->choice->options[1]->atk_incr, scene->choice->options[1]->def_incr, scene->choice->options[1]->hp_incr);
@@ -274,13 +285,18 @@ void implement_option(Character* player, Scenario* scene){
 
 
 
-void game(Scenario *scenario, Character *player){
+void game(Scenario *scenario, Character *player, bool loaded){
     Chapter temp;
     while(true){
         player->HP=scenario->life;
         printf("\nYou are now in %s\n\n", scenario->name);
         printf("%s\n\n", scenario->description);
-        implement_option(player, scenario);
+        if(!loaded){
+        implement_option(player, scenario, -1);
+        }
+        else{  
+        implement_option(player, scenario, scenario->choice->option_number);
+        }
         bool won=battle(player, scenario);
         if(scenario->next!=NULL && won){
             scenario=scenario->next;
@@ -302,4 +318,135 @@ void game(Scenario *scenario, Character *player){
             return;
         }
     }
+}
+
+
+////////////////////////////
+int read_int(){
+    int res, val;
+    do{
+        res = scanf("%d", &val);
+    }while(res != 1);
+    return val;
+}
+
+void read_filename(char* filename){
+    int res;
+    do{
+        res = scanf("%s", filename);
+    }while(res != 1);
+}
+
+int max(int a, int b){
+    return (a>b?a:b);
+}
+
+int read_int(); 
+
+void read_filename(char* filename); 
+
+int max(int a, int b); 
+
+
+
+
+// aqui estaria be començar ja amb les linked LISTS pels scenarios del JOC DE GLADIADORS
+
+
+void save_game(Scenario* scenario, Character* player){
+    // @brief Writes session sequence to a FILE
+    // @Returns: nothing
+
+    // 1. Checks for Sequence errors
+    int life = player->HP;
+    int enemy_life = scenario->enemies->hp;
+
+    // 2. Set filename variable from standard input
+    char filename[] = "saved_info.txt";
+
+    // 3. Opens the filename FILE in writing-mode and
+    //    checks that no errors are produced
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL){
+        printf("Error");
+        return; // Exit the function
+    }
+
+    // 4. Prints data to opened file as follows:
+    //     - print the score of the first step and jump 
+    //       to the next line,
+    //     - for each row in the board matrix, print all
+    //       numbers for that row separated by blank spaces
+    //       and jump to next line for each new row
+    //     - move to the next step in the sequence
+    //    
+    fprintf(fp, "%d\n", scenario->order);
+    fprintf(fp, "%d\n", ((int)(player->HP - scenario->choice->options[scenario->choice->option_number]->hp_incr)));
+    fprintf(fp, "%d\n", scenario->choice->option_number);
+    fprintf(fp, "%d\n", ((int)(player->atk_pts - scenario->choice->options[scenario->choice->option_number]->atk_incr)));
+    fprintf(fp, "%d\n", ((int)(player->def_pts - scenario->choice->options[scenario->choice->option_number]->def_incr)));
+    fprintf(fp, "%d\n", (int)enemy_life);
+    fprintf(fp, "%d\n", player->first_skill);
+    fprintf(fp, "%d\n", player->second_skill);
+    fprintf(fp, "%d\n", player->weapon);
+    fprintf(fp, "%d\n", player->character_num);
+
+    // 5. Closes the file
+    fclose(fp);
+}
+
+Scenario* load_game(Scenario* scenario, Character *player){
+    // @brief Reads a session sequence from a FILE
+    // @Returns: nothing
+
+    
+    // 2. Opens the filename FILE in reading-mode and
+    //    checks that no errors are produced
+    // 3. Restarts session sequence and game state
+    // 4. Reads data from file with the same structure
+    //    as it was saved, then adds the game state to
+    //    the sequence
+
+    FILE *fp = fopen("saved_info.txt", "r");
+    if (fp == NULL){
+        printf("You still haven't saved any game!");
+        return scenario; // Exit the function
+    }
+    int current_scenario=0;
+    int life;
+    int enemy_life;
+    int atk;
+    int def;
+    int first;
+    int second;
+    int weapon;
+    int charact;
+    while (!feof(fp)){
+        fscanf(fp, "%d", &current_scenario);
+        fscanf(fp, "%d", &life);     
+        fscanf(fp, "%d", scenario->choice->option_number);
+        fscanf(fp, "%d", &atk);
+        fscanf(fp, "%d", &def);
+        fscanf(fp, "%d", &enemy_life);
+        fscanf(fp, "%d ", &first);
+        fscanf(fp, "%d ", &second);
+        fscanf(fp, "%d ", &weapon);
+        fscanf(fp, "%d ", &charact);
+                }
+    while(scenario->order<current_scenario && scenario->next!=NULL){
+        scenario = scenario->next;
+    }
+    while(scenario->order>current_scenario && scenario->prev!=NULL){
+        scenario = scenario->prev;
+    }
+    player->atk_pts = atk;  
+    player->def_pts = def;
+    scenario->life=life;
+    scenario->enemies->hp=enemy_life;
+    player->first_skill=first;
+    player->second_skill=second;
+    player->weapon=weapon;
+    player->character_num=charact;        
+    fclose(fp);
+    return scenario;
 }
