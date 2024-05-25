@@ -29,6 +29,7 @@ typedef struct {
 typedef struct {
     Entry entries[MAX_ITEMS];
     int size;
+    bool initialized;
 } Dictionary;
 
 typedef struct {
@@ -40,6 +41,7 @@ typedef struct {
     int second_skill;
     int weapon;
     int character_num;
+    bool difficult;
     Skill skills[5];
     Dictionary dict;
 } Character;
@@ -68,6 +70,7 @@ void insert(Character *player, const char *key, int value) {
 
 void init_dictionary(Character *player) {
     player->dict.size = 0;
+    player->dict.initialized = true;
 }
 
 int get(Character *player, const char *key) {
@@ -79,6 +82,15 @@ int get(Character *player, const char *key) {
     return -1; // Key not found
 }
 
+void reinit_dictionary(Character *player) {
+    if (player->dict.initialized) {
+        player->dict.size = 0;
+        // Reinitialization logic can be added here if needed
+        printf("Dictionary reinitialized.\n");
+    } else {
+        printf("Dictionary is not initialized yet.\n");
+    }
+}
 
 void increment(Character *player, const char *key) {
     for (int i = 0; i < player->dict.size; i++) {

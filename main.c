@@ -7,6 +7,15 @@
 
 void configure_character(Character *player, int charact) {
     int choice;
+    int level;
+    printf("Choose difficulty!\n\t1. Medium (Revives allowed)\n\t2. Legendary\n\t");
+    level=read_decision();
+    if(level==2){
+        player->difficult=true;
+    }
+    else{
+        player->difficult=false;
+    }
     if(charact!=-1){
         choice=charact;
         }
@@ -26,7 +35,8 @@ void configure_character(Character *player, int charact) {
     printf("   * Defense Points: 4\n");
 
     printf("Choose your character (1, 2, or 3): ");
-    scanf("%d", &choice);
+    
+    choice=read_decision();
 }
 
     switch (choice) {
@@ -136,7 +146,10 @@ void configure_skills(Character* player){
         printf("   * Attack Points: %.2f\n", hero_skills[2].mod_atk);
         printf("   * Defense Points: %.2f\n\n", hero_skills[2].mod_def);}
         printf("Choose your skill number %d/2\n", (i+1));
-        scanf("%d", &choice);
+        choice=read_decision();
+
+
+
         if(choice==already_chosen){choice=4;}
         switch (choice) {
             case 1:
@@ -200,7 +213,8 @@ void configure_skills(Character* player){
         printf("   * Defense Points: %.2f\n\n", weapons[2].mod_def);
 
         printf("Choose your weapon:\n");
-        scanf("%d", &choice);
+        
+        choice=read_decision();
 
         switch (choice) {
             case 1:
@@ -246,16 +260,17 @@ void configure_skills(Character* player){
 void display_menu(Character *player) {
     int choice;
     bool chosen_character = false;
+    bool finished=false;
 
     do {
         printf("\n----- Gladiator RPG Menu -----\n");
         printf("1. Start New Game\n");
         printf("2. Configure Character before playing\n");
         printf("3. View Game Structure\n");
-        printf("4. Exit\n");
-        printf("5. Load Game\n");
+        printf("4. Load Game\n");
+        printf("5. Exit\n");
         printf("Enter your choice: ");
-        scanf("%d", &choice);
+        choice=read_decision();
 
         switch (choice) {
             case 1:
@@ -266,6 +281,7 @@ void display_menu(Character *player) {
                 start_game(player, false); //this is the function that leads character through the different scenarios in the game
                 break;
             case 2:
+                reinit_dictionary(player);
                 configure_character(player, -1); //this is the function that configures the players character
                 configure_skills(player);
                 chosen_character = true;
@@ -279,17 +295,20 @@ void display_menu(Character *player) {
                 printf("4. Colosseum Showdown\n");
                 break;
             case 4:
-                printf("Exiting the game. Guess you couldn't handle the pressure!\n");
-                break;
-            case 5:
                 printf("Loading Game...\n");
                 Character loaded_player;
+                init_dictionary(&loaded_player);
                 start_game(&loaded_player, true);
                 break;
+            case 5:
+                printf("Exiting the game. Guess you couldn't handle the pressure!\n");
+                finished=true;
+                break;
+            
             default:
                 printf("Invalid choice. Please enter a valid option.\n");
         }
-    } while (choice != 4);
+    } while (!finished);
 }
 
 void main(){

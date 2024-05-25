@@ -6,6 +6,8 @@
 
 #define TURNS 15
 
+void save_game(Scenario* scenario, Character* player);
+Scenario* load_game(Scenario* scenario, Character *player);
 
 TurnQueue create_turns(){
     // Create the queue with the turns
@@ -75,7 +77,6 @@ bool battle(Character* player, Scenario* scen){
     // Read the integer input from the user
     if(next_turn){
         current_turn = dequeue_turn(&turns);
-        printf("%d\n", current_turn);
         next_turn=false;
         }
     if(current_turn==1){
@@ -85,7 +86,7 @@ bool battle(Character* player, Scenario* scen){
     if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].name);}
     printf("6. Info\n");
     printf("7. Save game\n\n...\n");
-    scanf("%d", &move);
+    move=read_decision();
     float enemy_attack;
     // Use a do-while loop to make sure the input is correct
     switch (move) {
@@ -192,7 +193,8 @@ bool battle(Character* player, Scenario* scen){
             next_turn = false;
             break;
         default:
-            printf("Invalid choice. Please enter a valid option. (Your blunder lost you a turn)\n");
+            printf("Invalid choice. (Your blunder lost you a turn)\n");
+            next_turn=true;
             break;
     }}
     if(current_turn==0){
@@ -229,20 +231,15 @@ void print_enemy_info(Enemy* enemy) {
 }
 
 void implement_option(Character* player, Scenario* scene, int prev_choice){
-    int choice=0;
+    int choice=prev_choice;
     bool valid_input=false;
     do{
-    if(prev_choice==-1){printf("%s\n\n", scene->choice->question_text);
+    if(choice==-1){printf("%s\n\n", scene->choice->question_text);
     printf("1. %s\n", scene->choice->options[0]->narrative_text_i);
     printf("2. %s\n", scene->choice->options[1]->narrative_text_i);
     printf("3. Info\n\n");    
-    scanf("%d", &choice);
+    choice=read_decision();
     choice--;
-    }
-    else{
-        //choice=prev_choice;
-        printf("LOL");
-        choice=0;
     }
     switch (choice) {
             case 0:
@@ -279,7 +276,9 @@ void implement_option(Character* player, Scenario* scene, int prev_choice){
             default:
                 printf("Invalid option, repeat your selection!");
                 break;
-    }}while(!valid_input);
+    }
+    choice=-1;
+    }while(!valid_input);
 }
 
 
@@ -289,6 +288,7 @@ void game(Scenario *scenario, Character *player, bool loaded){
     Chapter temp;
     while(true){
         player->HP=scenario->life;
+        scenario->enemies->hp=scenario->enemies->initial_hp;
         printf("\nYou are now in %s\n\n", scenario->name);
         printf("%s\n\n", scenario->description);
         if(!loaded){
@@ -296,6 +296,7 @@ void game(Scenario *scenario, Character *player, bool loaded){
         }
         else{  
         implement_option(player, scenario, scenario->choice->option_number);
+        loaded=false;
         }
         bool won=battle(player, scenario);
         if(scenario->next!=NULL && won){
@@ -303,7 +304,7 @@ void game(Scenario *scenario, Character *player, bool loaded){
             scenario->life=player->HP;
             }
         else if(!won){
-            if(scenario->next==NULL){
+            if(scenario->next==NULL || player->difficult){
                 printf("FATALITY\n\n");
                 scenario=scenario->next;
                 return;
@@ -322,7 +323,7 @@ void game(Scenario *scenario, Character *player, bool loaded){
 
 
 ////////////////////////////
-int read_int(){
+/* int read_int(){
     int res, val;
     do{
         res = scanf("%d", &val);
@@ -341,11 +342,11 @@ int max(int a, int b){
     return (a>b?a:b);
 }
 
-int read_int(); 
+*/
 
-void read_filename(char* filename); 
 
-int max(int a, int b); 
+
+
 
 
 

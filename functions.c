@@ -184,3 +184,24 @@ void print_player_info(Character* player) {
     printf("Player HP: %.2f\n", player->HP);
     printf("Player Defense Points: %.2f\n\n", player->def_pts);
 }
+
+
+int read_decision(){
+        char input[100];  // Buffer to hold the input
+        int success;
+        int choice;
+
+        if (fgets(input, sizeof(input), stdin) != NULL) {
+        // Attempt to parse the input as an integer
+        success = sscanf(input, "%d", &choice);
+
+        // Check if the parsing was successful
+        if (success != 1) {
+            return -1;
+        }
+        } else {
+            printf("Error reading input.\n");
+        }
+        return choice;
+
+}
