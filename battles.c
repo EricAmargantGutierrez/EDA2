@@ -1,8 +1,8 @@
+#include "battles.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
-#include "functions.c"
 
 #define TURNS 15
 
@@ -54,12 +54,12 @@ void counter_Attack(Enemy* enemy1, Character* player, int enemy_move, int player
     odds+=0.7;
     // multiply the damage by the "luck factor"
     float attack_damage=damage*odds;
-    
+    printf("You are hit with: %s\n", enemy1->skills[enemy_move].name);
    // printf("enemy dmg %.2f\t odds_dmg %.2f \n", damage, attack_damage);
     player->HP-=attack_damage;
 }
 
-bool battle(Character* player, Scenario* scen){
+int combat(Character* player, Scenario* scen){
     // Initialize the Queue where we will store the movements
     Enemy *enemy=scen->enemies;
     TurnQueue turns = create_turns();
@@ -81,11 +81,13 @@ bool battle(Character* player, Scenario* scen){
         }
     if(current_turn==1){
     printf("Player's Turn \n\n");
-    printf("1. %s\n2. %s\n3. %s\n", player->skills[0].name, player->skills[1].name, player->skills[2].name);
+    printf("1. %s\n2. %s\n", player->skills[0].name, player->skills[1].name);
+    if(player->skills[2].can_be_used){printf("3. %s\n", player->skills[2].name);}
     if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].name);}
     if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].name);}
     printf("6. Info\n");
-    printf("7. Save game\n\n...\n");
+    printf("7. Save game\n");
+    printf("8. Leave game\n\n...\n");
     move=read_decision();
     float enemy_attack;
     // Use a do-while loop to make sure the input is correct
@@ -115,6 +117,9 @@ bool battle(Character* player, Scenario* scen){
             next_turn=true;
             break;
         case 3:
+            if(!player->skills[2].can_be_used){
+                printf("Cool off period\n");
+                break;}
             // Call function to inflict damage on the enemy
             turn(player, enemy, move);
             // enqueue the move used
@@ -128,7 +133,7 @@ bool battle(Character* player, Scenario* scen){
             break;
         case 4:
             if(!player->skills[3].can_be_used){
-                printf("Already used this skill the maximum number of times");
+                printf("Already used this skill the maximum number of times\n");
                 break;}
             // Call function to inflict damage on the enemy
             turn(player, enemy, move);
@@ -143,9 +148,9 @@ bool battle(Character* player, Scenario* scen){
             break;
         case 5:
             if(!player->skills[4].can_be_used){
-                printf("Already used this skill the maximum number of times");
+                printf("Already used this skill the maximum number of times\n");
                 break;}
-            if(stack.elements<1){ printf("Can't be used, too few previous moves");
+            if(stack.elements<1){ printf("Can't be used, too few previous moves\n");
                 break;};
             // we want to make sure that we will pop at least one element
             int turns=rand()%(stack.elements);
@@ -192,11 +197,25 @@ bool battle(Character* player, Scenario* scen){
             save_game(scen, player);
             next_turn = false;
             break;
+        case 8:
+            return -1;
         default:
             printf("Invalid choice. (Your blunder lost you a turn)\n");
             next_turn=true;
             break;
-    }}
+    }
+    if(strcmp(player->skills[2].name, "Invisible Knife (Cool Down)")==0){
+        if(move==3){
+            player->skills[2].can_be_used=false;
+        }
+        else{
+            player->skills[2].can_be_used=true;
+        }
+    }
+    else{
+        player->skills[2].can_be_used=true;
+    }
+    }
     if(current_turn==0){
         printf("%s's Turn:\n\n", enemy->name);
         // Enemy counter_attack
@@ -207,10 +226,10 @@ bool battle(Character* player, Scenario* scen){
     }
 
     if(player->HP<0 || turns.elements<0){
-        return false;
+        return 0;
     }
     else if(enemy->hp<0){
-        return true;
+        return 1;
     }
 } 
     
@@ -288,7 +307,6 @@ void game(Scenario *scenario, Character *player, bool loaded){
     Chapter temp;
     while(true){
         player->HP=scenario->life;
-        scenario->enemies->hp=scenario->enemies->initial_hp;
         printf("\nYou are now in %s\n\n", scenario->name);
         printf("%s\n\n", scenario->description);
         if(!loaded){
@@ -298,15 +316,18 @@ void game(Scenario *scenario, Character *player, bool loaded){
         implement_option(player, scenario, scenario->choice->option_number);
         loaded=false;
         }
-        bool won=battle(player, scenario);
-        if(scenario->next!=NULL && won){
+        int result=combat(player, scenario);
+        if(scenario->next!=NULL && result==1){
             scenario=scenario->next;
             scenario->life=player->HP;
             }
-        else if(!won){
+        else if(result==0){
             if(scenario->next==NULL || player->difficult){
                 printf("FATALITY\n\n");
                 scenario=scenario->next;
+                return;
+            }
+            else if(result==-1){
                 return;
             }
             else{
@@ -323,26 +344,6 @@ void game(Scenario *scenario, Character *player, bool loaded){
 
 
 ////////////////////////////
-/* int read_int(){
-    int res, val;
-    do{
-        res = scanf("%d", &val);
-    }while(res != 1);
-    return val;
-}
-
-void read_filename(char* filename){
-    int res;
-    do{
-        res = scanf("%s", filename);
-    }while(res != 1);
-}
-
-int max(int a, int b){
-    return (a>b?a:b);
-}
-
-*/
 
 
 
@@ -410,7 +411,14 @@ Scenario* load_game(Scenario* scenario, Character *player){
 
     FILE *fp = fopen("saved_info.txt", "r");
     if (fp == NULL){
-        printf("You still haven't saved any game!");
+        printf("You still haven't saved any game! Defaulting to base attributes");
+        // Initialize default values so we don't get an error
+        player->atk_pts = 5;  
+        player->def_pts = 5;
+        player->first_skill = 0;
+        player->second_skill = 1;
+        player->weapon = 0;
+        player->character_num = 0;
         return scenario; // Exit the function
     }
     int current_scenario=0;
@@ -422,24 +430,47 @@ Scenario* load_game(Scenario* scenario, Character *player){
     int second;
     int weapon;
     int charact;
-    while (!feof(fp)){
-        fscanf(fp, "%d", &current_scenario);
-        fscanf(fp, "%d", &life);     
-        fscanf(fp, "%d", scenario->choice->option_number);
-        fscanf(fp, "%d", &atk);
-        fscanf(fp, "%d", &def);
-        fscanf(fp, "%d", &enemy_life);
-        fscanf(fp, "%d ", &first);
-        fscanf(fp, "%d ", &second);
-        fscanf(fp, "%d ", &weapon);
-        fscanf(fp, "%d ", &charact);
-                }
+    int option_number;
+  while (fscanf(fp, "%d", &current_scenario) != EOF) {
+        if (fscanf(fp, "%d", &life) != 1 ||
+            fscanf(fp, "%d", &option_number) != 1 ||
+            fscanf(fp, "%d", &atk) != 1 ||
+            fscanf(fp, "%d", &def) != 1 ||
+            fscanf(fp, "%d", &enemy_life) != 1 ||
+            fscanf(fp, "%d ", &first) != 1 ||
+            fscanf(fp, "%d ", &second) != 1 ||
+            fscanf(fp, "%d ", &weapon) != 1 ||
+            fscanf(fp, "%d ", &charact) != 1){
+            printf("You still haven't saved any game! Defaulting to base attributes");
+        // Initialize default values so we don't get an error
+        player->atk_pts = 5;  
+        player->def_pts = 5;
+        player->first_skill = 0;
+        player->second_skill = 1;
+        player->weapon = 0;
+        player->character_num = 0;
+        return scenario; // Exit the function
+        }
+        }
     while(scenario->order<current_scenario && scenario->next!=NULL){
         scenario = scenario->next;
     }
     while(scenario->order>current_scenario && scenario->prev!=NULL){
         scenario = scenario->prev;
     }
+
+    // Keep the values inside the desired range
+    atk%=10;
+    def%=10;
+    life%=300;
+    enemy_life%=200;
+    first%=3;
+    second%=3;
+    weapon%=3;
+    charact%=3;
+    option_number%=4;
+
+
     player->atk_pts = atk;  
     player->def_pts = def;
     scenario->life=life;
@@ -447,7 +478,8 @@ Scenario* load_game(Scenario* scenario, Character *player){
     player->first_skill=first;
     player->second_skill=second;
     player->weapon=weapon;
-    player->character_num=charact;        
+    player->character_num=charact;  
+    scenario->choice->option_number=option_number;      
     fclose(fp);
     return scenario;
 }

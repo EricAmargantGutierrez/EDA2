@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
-#include "structures.h"
+#include "functions.h"
 
 void Enqueue_Battle(BattleQueue *queue, Character *character, Enemy* enemy) {
     // Create a new node
@@ -34,7 +34,8 @@ void init_enemy(Enemy* enemy, char* name, int hp, int atk, int def){
     enemy->initial_hp = hp;
     enemy->atk = atk;
     enemy->def = def;
-    memcpy(enemy->skills, enemy_skills, sizeof(enemy_skills));
+    enemy->skills[0]=skills_enemy[0];
+    enemy->skills[1]=skills_enemy[1];
 }
 
 
@@ -52,19 +53,6 @@ void init_scenario(Scenario* scene, char* name, char* descript, Enemy* enemy, De
 }
 
 
-// Queue for the turns
-
-typedef struct Turn {    // We will use this as the nodes in the scenario queues
-    int which_player;
-    struct Turn *next;
-} Turn;
-
-// Queue
-typedef struct {
-    Turn *head;
-    Turn *tail;
-    int elements;
-} TurnQueue;
 
 void init_turn_queue(TurnQueue* q){
     q->head=NULL;
@@ -205,3 +193,5 @@ int read_decision(){
         return choice;
 
 }
+
+
