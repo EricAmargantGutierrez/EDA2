@@ -166,7 +166,7 @@ BattleTurn pop_battle_move(BattleStack *s) {
 
 // Initialize the different arrays of skills
 Skill weapons[3] = {
-    {"Shield", "Use your deception skills to inflict sudden damage to your enemy.", true, 5, 10, 5},
+    {"Shield", "Utilize your defensive prowess to absorb enemy attacks, significantly reducing damage taken while being able to stay close and deal critical damage", true, 5, 10, 5}, 
     {"Bow and Arrow", "Use your archery skills to damage the enemy from far away, while minimizing your exposure to their attack.", true, 0, 10, 10},
     {"Invisible Knife (Cool Down)", "This attack can be used to quickly and silently eliminate a single enemy.", true, 20, 0, 10}  // cool_down period?
 };
@@ -179,7 +179,7 @@ Skill hero_skills[3] = {
 
 Skill special_skills[2] = {
     {"Regenerate", "Use your medicinal knowledge to heal yourself (+100 HP). Note that this ability can only be used once.", true, 0, 0, 100},
-    {"Time Strike", "Harness the power of time to unleash one of the previously used skills (except 'Regenerate'), ensuring that your next turn follows immediately while inflicting damage on the opponent. Note that this ability can only be used once.", true, 0, 0, 0}
+    {"Time Strike", "Harness the power of time to unleash one of the previously used skills (except 'Regenerate'), and duplicate the attack, defense, and HP bonus of the skill selected at random. Note that this ability can only be used once.", true, 0, 0, 0}
 };
 
 Skill skills_enemy[2] = {
@@ -202,7 +202,7 @@ Option opt2_rome = {"Face Adversaries", "You confront your adversaries directly,
 
 Option opt1_pompeii = {"Ally with Caesar", "You decide to ally yourself with Julius Caesar, intrigued by the potential benefits of such a powerful connection.", "Your alliance with Julius Caesar opens doors to new opportunities and grants you access to influential circles in Pompeii. You exploit those connections and gain 2 attack points but your defense is reduced by 1 as powerful enemies have spotted some of your weak points.", 0, 2, -1};
 
-Option opt2_pompeii = {"Exercise Caution", "You choose to tread cautiously, wary of Julius Caesar's motives and the risks associated with such a partnership.", "Your cautious approach safeguards you from potential pitfalls and allows you to navigate the political landscape of Pompeii with prudence. You gain 2 HP points.", 20, 0, 0};
+Option opt2_pompeii = {"Exercise Caution", "You choose to tread cautiously, wary of Julius Caesar's motives and the risks associated with such a partnership.", "Your cautious approach safeguards you from potential pitfalls and allows you to navigate the political landscape of Pompeii with prudence. You gain 20 HP points.", 20, 0, 0};
 
 Option opt1_thermal = {"Investigate Argument", "You decide to investigate the heated argument, intrigued by the involvement of powerful figures.", "Your investigation uncovers valuable information and earns you the respect of influential individuals in the city. Additionally, Maximus Kratos invited you to a self-defense masterclass, earning you 3 defense points!", 0, 0, 3};
 

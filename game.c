@@ -349,9 +349,10 @@ void play(Character *player) {
                 if(chosen_character){
                 //this is the function that leads character through the different scenarios in the game
                 start_game(player, false); 
+                chosen_character=false;
                 break;
                 }
-                printf("You have not configured your character yet. Go to '2. Configure Character'\n\n");
+                printf("You have not configured your character yet. You will be redirected to '2. Configure Character'\n\n");
             case 2:
                 // reinitialize the dictionary just in case this is the 2nd+ time we have chosen skills in this run of the program
                 reinit_dictionary(player);

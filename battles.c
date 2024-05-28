@@ -241,6 +241,7 @@ int combat(Character* player, Scenario* scen){
             break;
         case 7:
             save_game(scen, player);
+            printf("\nYour game was saved. Press '8' to leave the game\n");
             next_turn = false;
             break;
         case 8:
@@ -451,7 +452,7 @@ void game(Scenario *scenario, Character *player, bool loaded){
             }
             else{
                 // if we have lost, but are in one of the first 3 scenarios, and are in easy mode, then we start over the scenario
-                printf("YOU HAVE FAILED!\n LUCKY FOR YOU, THE GODDESS FORTUNE HAS GRANTED YOU ANOTHER CHANCE! \n\n");
+                printf("YOU HAVE FAILED!\nLUCKY FOR YOU, THE GODDESS FORTUNE HAS GRANTED YOU ANOTHER CHANCE! \n\n");
                 // set the hp of the enemy to its initial value
                 scenario->enemies->hp = scenario->enemies->initial_hp;
                 // we are given the choice to choose our option again, so we must subtract the modifiers
