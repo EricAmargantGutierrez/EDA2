@@ -5,10 +5,7 @@
 #include "game.c"
 
 void main(){
+    // Initialize the character, and start the game
     Character player;
-    init_dictionary(&player);
-    display_menu(&player);
+    play(&player);
 }
-
-
-// controlar els bounds dels valors llegits del .txt amb un %3

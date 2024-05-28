@@ -39,21 +39,21 @@ void init_enemy(Enemy* enemy, char* name, int hp, int atk, int def){
 }
 
 
-void init_scenario(Scenario* scene, char* name, char* descript, Enemy* enemy, Decision* choice, Scenario *next, Scenario *prev, int order){ //canviar
+void init_scenario(Scenario* scene, char* name, char* descript, Enemy* enemy, Decision* choice, Scenario *next, int order){ //canviar
     strcpy(scene->name, name);
     strcpy(scene->description, descript);
     scene->enemies=enemy;
     scene->choice = choice;
     scene->next = next;
-    scene->prev = prev;
-    if(scene->prev==NULL){
+    scene->order = order;
+    if(scene->order==1){
         scene->life=100;
     }
-    scene->order = order;
+    
 }
 
 
-
+// initialize an empty queue of turns
 void init_turn_queue(TurnQueue* q){
     q->head=NULL;
     q->tail=NULL;
@@ -173,7 +173,8 @@ void print_player_info(Character* player) {
     printf("Player Defense Points: %.2f\n\n", player->def_pts);
 }
 
-
+// function we will use to read input all throughout the code instead of using scanf
+// this function manages the errors in case the user doesn't enter an integer
 int read_decision(){
         char input[100];  // Buffer to hold the input
         int success;

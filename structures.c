@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// Function definitions
+// Insert the skills on the dictionary
 void insert(Character *player, const char *key, int value) {
     if (player->dict.size >= MAX_ITEMS) {
         printf("Dictionary is full\n");
@@ -25,11 +25,13 @@ void insert(Character *player, const char *key, int value) {
     player->dict.size++;
 }
 
+// Initialize an empty dictionary
 void init_dictionary(Character *player) {
     player->dict.size = 0;
     player->dict.initialized = true;
 }
 
+// Get element from the dictionary
 int get(Character *player, const char *key) {
     for (int i = 0; i < player->dict.size; i++) {
         if (strncmp(player->dict.entries[i].key, key, MAX_LENGTH) == 0) {
@@ -39,12 +41,14 @@ int get(Character *player, const char *key) {
     return -1; // Key not found
 }
 
+// Reinitialize the dictionary in the case that it was already initialized, but we have re-configured the character's skills
 void reinit_dictionary(Character *player) {
     if (player->dict.initialized) {
         player->dict.size = 0;
     }
 }
 
+// Increment by one the number of times a skill has been used
 void increment(Character *player, const char *key) {
     for (int i = 0; i < player->dict.size; i++) {
         if (strncmp(player->dict.entries[i].key, key, MAX_LENGTH) == 0) {
@@ -55,21 +59,28 @@ void increment(Character *player, const char *key) {
     printf("Key '%s' not found in dictionary\n", key);
 }
 
+
+// initialize an empty battle queue
 void init_battle_queue(BattleQueue *q) {
     q->head = NULL;
     q->tail = NULL;
     q->elements = 0;
 }
 
-void enqueue_battle_move(BattleQueue* q, int move, Character *character) {
+
+// self-explanatory
+void enqueue_battle_move(BattleQueue* q, int move, Character *character, bool player) {
     q->elements += 1;
 
+    // reserve space for the battle turn we want to enqueue
     BattleTurn *node = (BattleTurn *)malloc(sizeof(BattleTurn));
     if (node == NULL) {
         return;
     }
 
+    // set the necessary parameters of the battle turn
     node->move_used = move;
+    node->player = player;
     node->character = character;
     node->next = NULL;
 
@@ -82,12 +93,17 @@ void enqueue_battle_move(BattleQueue* q, int move, Character *character) {
     q->tail = node;
 }
 
+
+// also self-explanatory
 BattleTurn dequeue_battle_move(BattleQueue* q) {
+
+    // declare the battle turn we will return
     BattleTurn *temp = (BattleTurn *)malloc(sizeof(BattleTurn));
     if (q->head == NULL) {
         return *temp;
     }
 
+    // move the head to the next turn in the queue
     temp = q->head;
     q->head = q->head->next;
 
@@ -97,14 +113,19 @@ BattleTurn dequeue_battle_move(BattleQueue* q) {
 
     q->elements -= 1;
 
+    // return battle turn
     return *temp;
 }
 
+
+// initialize an empty battle stack
 void init_battle_stack(BattleStack *s) {
     s->head = NULL;
     s->elements = 0;
 }
 
+
+// self-explanatory
 void push_battle_move(BattleStack *s, int move, Character *character) {
     s->elements += 1;
 
@@ -120,6 +141,8 @@ void push_battle_move(BattleStack *s, int move, Character *character) {
     s->head = node;
 }
 
+
+// also self-explanatory
 BattleTurn pop_battle_move(BattleStack *s) {
     BattleTurn result;
 
@@ -140,52 +163,8 @@ BattleTurn pop_battle_move(BattleStack *s) {
     return result;
 }
 
-void init_scene_queue(ScenarioQueue *q) {
-    q->head = NULL;
-    q->tail = NULL;
-    q->elements = 0;
-}
 
-void enqueue_scenario(ScenarioQueue* q, Scenario *scene) {
-    q->elements += 1;
-
-    Chapter *node = (Chapter *)malloc(sizeof(Chapter));
-    if (node == NULL) {
-        return;
-    }
-
-    node->life = 100;
-    node->scene = scene;
-    node->next = NULL;
-
-    if (q->tail == NULL) {
-        q->head = node;
-    } else {
-        q->tail->next = node;
-    }
-
-    q->tail = node;
-}
-
-Chapter dequeue_scenario(ScenarioQueue* q) {
-    Chapter *temp = (Chapter *)malloc(sizeof(Chapter));
-    if (q->head == NULL) {
-        return *temp;
-    }
-
-    temp = q->head;
-    q->head = q->head->next;
-
-    if (q->head == NULL) {
-        q->tail = NULL;
-    }
-
-    q->elements -= 1;
-
-    return *temp;
-}
-
-// Global variables
+// Initialize the different arrays of skills
 Skill weapons[3] = {
     {"Shield", "Use your deception skills to inflict sudden damage to your enemy.", true, 5, 10, 5},
     {"Bow and Arrow", "Use your archery skills to damage the enemy from far away, while minimizing your exposure to their attack.", true, 0, 10, 10},
@@ -223,7 +202,7 @@ Option opt2_rome = {"Face Adversaries", "You confront your adversaries directly,
 
 Option opt1_pompeii = {"Ally with Caesar", "You decide to ally yourself with Julius Caesar, intrigued by the potential benefits of such a powerful connection.", "Your alliance with Julius Caesar opens doors to new opportunities and grants you access to influential circles in Pompeii. You exploit those connections and gain 2 attack points but your defense is reduced by 1 as powerful enemies have spotted some of your weak points.", 0, 2, -1};
 
-Option opt2_pompeii = {"Exercise Caution", "You choose to tread cautiously, wary of Julius Caesar's motives and the risks associated with such a partnership.", "Your cautious approach safeguards you from potential pitfalls and allows you to navigate the political landscape of Pompeii with prudence. You gain 2 HP points.", 2, 0, 0};
+Option opt2_pompeii = {"Exercise Caution", "You choose to tread cautiously, wary of Julius Caesar's motives and the risks associated with such a partnership.", "Your cautious approach safeguards you from potential pitfalls and allows you to navigate the political landscape of Pompeii with prudence. You gain 2 HP points.", 20, 0, 0};
 
 Option opt1_thermal = {"Investigate Argument", "You decide to investigate the heated argument, intrigued by the involvement of powerful figures.", "Your investigation uncovers valuable information and earns you the respect of influential individuals in the city. Additionally, Maximus Kratos invited you to a self-defense masterclass, earning you 3 defense points!", 0, 0, 3};
 
@@ -235,7 +214,7 @@ Option opt2_colosseum = {"Analyze Weaknesses", "You opt to analyze your opponent
 
 
 
-
+// Initialize the decisions
 Decision rome_dec = {"You spend your days honing your combat skills under the watchful eye of seasoned gladiators. Your dedication earns you the respect of your peers and the admiration of your trainers. However, tensions rise within the Ludus as rivalries emerge among the gladiators. Will you forge alliances to overcome your adversaries, or will you face them head-on in combat?", {&opt1_rome, &opt2_rome}, 0};
 
 Decision pompeii_dec = {"At the designated rendezvous point, you come face to face with the enigmatic Julius Caesar, this still young and mysterious figure who summoned you. Their identity shrouded in secrecy, he offers you a proposition that could tip the balance of power in Pompeii. Will you ally yourself with this mysterious benefactor, or will you tread cautiously, wary of hidden agendas and ulterior motives?", {&opt1_pompeii, &opt2_pompeii}, 0};

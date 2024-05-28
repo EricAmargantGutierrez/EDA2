@@ -10,6 +10,7 @@
 #include <stdbool.h>
 // Define structs
 
+// skills that the player or enemy can use in combat
 typedef struct {
     char name[50];
     char description[300];
@@ -19,22 +20,30 @@ typedef struct {
     float mod_hp;
 } Skill;
 
+
+// entries in the dictionary that counts the usage of skills
 typedef struct {
     char key[MAX_LENGTH];
     int value;
 } Entry;
 
+
+// dictionary that counts the usage of skills
 typedef struct {
     Entry entries[MAX_ITEMS];
     int size;
     bool initialized;
 } Dictionary;
 
+
+// our player and its attributes
 typedef struct {
     char name[50];
     float HP;
     float atk_pts;
     float def_pts;
+    // these will be the choices the player has made in choosing skills
+    // they will later be uploaded to the .txt file
     int first_skill;
     int second_skill;
     int weapon;
@@ -44,6 +53,7 @@ typedef struct {
     Dictionary dict;
 } Character;
 
+// enemy data structure
 typedef struct {
     char name[50];
     float hp;
@@ -53,6 +63,8 @@ typedef struct {
     Skill skills[3]; //enemies cannot heal themselves
 } Enemy;
 
+
+// different options that the player can choose in each scenario
 typedef struct{
     char narrative_text_i[400];
     char response_text[200];
@@ -62,12 +74,16 @@ typedef struct{
     float def_incr;
 } Option;
 
+
+// the decision the player will face in each scenario
 typedef struct {
     char question_text[400];
     Option *options[2];
     int option_number;
 } Decision;
 
+
+// the scenario
 typedef struct scen {
     char name[50];
     char description[400];
@@ -76,51 +92,48 @@ typedef struct scen {
     int life;
     int order;
     struct scen *next;
-    struct scen *prev;
 } Scenario;
 
+
+
+
+// Data structure for the battle moves
 typedef struct BattleTurn {
     int move_used;
+    bool player;
     Character *character;
     struct BattleTurn *next;
 } BattleTurn;
 
+// queue for the battle moves
 typedef struct {
     BattleTurn *head;
     BattleTurn *tail;
     int elements;
 } BattleQueue;
 
-// Queue for the turns
 
+
+// Data structure for the turns
 typedef struct Turn {    // We will use this as the nodes in the scenario queues
     int which_player;
     struct Turn *next;
 } Turn;
 
-// Queue
+// Queue for the turns
 typedef struct {
     Turn *head;
     Turn *tail;
     int elements;
 } TurnQueue;
 
+
+// stack for the battle turns
 typedef struct {
     BattleTurn *head;
     int elements;
 } BattleStack;
 
-typedef struct Chapter {
-    int life;               // we can use this in case we want to go back in the game, to remember the amount of life we had at that point
-    Scenario *scene;
-    struct Chapter *next;
-} Chapter;
-
-typedef struct {
-    Chapter *head;
-    Chapter *tail;
-    int elements;
-} ScenarioQueue;
 
 // Function declarations
 void insert(Character *player, const char *key, int value);
@@ -130,16 +143,14 @@ void reinit_dictionary(Character *player);
 void increment(Character *player, const char *key);
 
 void init_battle_queue(BattleQueue *q);
-void enqueue_battle_move(BattleQueue* q, int move, Character *character);
+void enqueue_battle_move(BattleQueue* q, int move, Character *character, bool player);
 BattleTurn dequeue_battle_move(BattleQueue* q);
 
 void init_battle_stack(BattleStack *s);
 void push_battle_move(BattleStack *s, int move, Character *character);
 BattleTurn pop_battle_move(BattleStack *s);
 
-void init_scene_queue(ScenarioQueue *q);
-void enqueue_scenario(ScenarioQueue* q, Scenario *scene);
-Chapter dequeue_scenario(ScenarioQueue* q);
+// declare initialized data structures we will use
 
 extern Skill weapons[3];
 extern Skill hero_skills[3];
