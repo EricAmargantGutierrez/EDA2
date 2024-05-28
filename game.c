@@ -9,21 +9,7 @@
 // function to set up the character's basic attributes (name, hp, attack points, etc)
 void configure_character(Character *player, int charact) {
     int choice;
-    // A "level" integer which asks us to set up the difficulty of the game 
-    int level;
-    printf("Choose difficulty!\n\t1. Medium (Revives allowed)\n\t2. Legendary\n\t");
-    // Use read_decision() function, which asks input from the user, and controls errors from invalid inputs (eg. inputting a char instead of an int)
-    level=read_decision();
-    // If the player chooses to select "legendary" difficulty by entering int 2, then there will be no revives during the game
-    if(level==2){
-        // Use of a boolean to select the level in order to save memory space
-        player->difficult=true;
-    }
-    // If the player enters 1, then revives are allowed
-    // Also by default, any non 2 number will set the difficulty to low
-    else{
-        player->difficult=false;
-    }
+
     // If there is a number 1-2-3 in the arguments passed, then we are loading a saved game, and we already have decided our choice
     // If the argument we pass is -1, it means we still have to choose
     if(charact!=-1){
@@ -31,6 +17,28 @@ void configure_character(Character *player, int charact) {
         }
     // Print the info for each character
     else{
+        // A "level" integer which asks us to set up the difficulty of the game 
+    player->turns_played=0;
+    int level;
+    printf("Choose difficulty!\n\t1. Medium (Revives allowed)\n\t2. Legendary\n\t");
+    // Use read_decision() function, which asks input from the user, and controls errors from invalid inputs (eg. inputting a char instead of an int)
+    level=read_decision();
+    // If the player chooses to select "legendary" difficulty by entering int 2, then there will be no revives during the game
+    if(level==1){
+        // Use of a boolean to select the level in order to save memory space
+        player->difficult=false;
+    }
+    // If the player enters 1, then revives are allowed
+    // Also by default, any non 2 number will set the difficulty to low
+    else if(level==2){
+        player->difficult=true;
+    }
+    else{
+        printf("Your input was invalid. You have been defaulted to the Medium path");
+        player->difficult=false;
+    }
+
+
     printf("Character selection:\n");
     printf("1. Arnaus Decimus Meridius\n");
     printf("   * HP: 100\n");
@@ -123,6 +131,8 @@ void start_game(Character *player, bool load_scenario){
     if(load_scenario){
         // Using the load_game function, which returns a scenario pointer, we set up the player and the scenario with the correct
         // specificities we have saved
+        player->skills[3]=special_skills[0];
+        player->skills[4]=special_skills[1];
         scen = load_game(scen, player);
         // Use the configure character function we have declared previously
         // Here we pass the integer player->character_num, which is a number 1-2-3 that sets up the player attributes and name as explained in the definition of the function
@@ -131,8 +141,6 @@ void start_game(Character *player, bool load_scenario){
         player->skills[0]=hero_skills[player->first_skill];
         player->skills[1]=hero_skills[player->second_skill];
         player->skills[2]=weapons[player->weapon];
-        player->skills[3]=special_skills[0];
-        player->skills[4]=special_skills[1];
         // Initialize the values of the Dictionary we use to store all the skills, and how many times they have been used
         for(int i=0; i<5; i++){
         insert(player, player->skills[i].name, 0);

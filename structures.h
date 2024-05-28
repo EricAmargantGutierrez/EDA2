@@ -51,6 +51,7 @@ typedef struct {
     bool difficult;
     Skill skills[5];
     Dictionary dict;
+    int turns_played;
 } Character;
 
 // enemy data structure

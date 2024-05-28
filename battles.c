@@ -7,7 +7,7 @@
 #define TURNS 15
 
 // Declare the save game and load game functions
-void save_game(Scenario* scenario, Character* player);
+void save_game(Scenario* scenario, Character* player, int turns);
 Scenario* load_game(Scenario* scenario, Character *player);
 
 
@@ -83,7 +83,7 @@ int combat(Character* player, Scenario* scen){
     Enemy *enemy=scen->enemies;
     
     // Initialize the Queue where we will store the movements
-    TurnQueue turns = create_turns();
+    TurnQueue qturns = create_turns();
 
     // We will use the BattleQueue q, so that we can later print in order all of the moves in the battle
     BattleQueue q;
@@ -98,15 +98,20 @@ int combat(Character* player, Scenario* scen){
     bool next_turn=true;
     int current_turn = 1;
 
+    // in the case that we are loading a game, we have already played several turns, so we will dequeue as man turns from the queue, as turns we have played previously
+    for(int i=0; i<player->turns_played; i++){
+        dequeue_turn(&qturns);
+    }
+    player->turns_played=0;
     // While the conditions for us to keep playing are true
-    while (enemy->hp > 0.0 && player->HP > 0.0 && turns.elements>0){
+    while (enemy->hp > 0.0 && player->HP > 0.0 && qturns.elements>0){
     int move=0;
     // Read the integer input from the user
 
     // next turn will tell us if we can go forward because a valid move has been used
     // for example if we want info, or to save the game, we will not loose a turn, because this bool will be set to false
     if(next_turn){
-        current_turn = dequeue_turn(&turns);
+        current_turn = dequeue_turn(&qturns);
         next_turn=false;
         }
     if(current_turn==1){
@@ -240,7 +245,7 @@ int combat(Character* player, Scenario* scen){
             next_turn = false;
             break;
         case 7:
-            save_game(scen, player);
+            save_game(scen, player, (16-qturns.elements));
             printf("\nYour game was saved. Press '8' to leave the game\n");
             next_turn = false;
             break;
@@ -322,7 +327,7 @@ int combat(Character* player, Scenario* scen){
         // return 1 means the battle is won
         return 1;
     }
-    if(turns.elements<1){
+    if(qturns.elements<1){
         // LOST THE BATTLE
         printf("You are out of turns\n");
         printf("Battle summary!\n");
@@ -361,7 +366,8 @@ void implement_option(Character* player, Scenario* scene, int prev_choice){
     bool valid_input=false;
     do{
         // print the 2 options and an info
-    if(choice==-1){printf("%s\n\n", scene->choice->question_text);
+    if(choice==-1){
+    printf("%s\n\n", scene->choice->question_text);
     printf("1. %s\n", scene->choice->options[0]->narrative_text_i);
     printf("2. %s\n", scene->choice->options[1]->narrative_text_i);
     printf("3. Info\n\n");    
@@ -479,7 +485,7 @@ void game(Scenario *scenario, Character *player, bool loaded){
 
 
 // function to save the game
-void save_game(Scenario* scenario, Character* player){
+void save_game(Scenario* scenario, Character* player, int turns){
 
     int life = player->HP;
     int enemy_life = scenario->enemies->hp;
@@ -494,8 +500,35 @@ void save_game(Scenario* scenario, Character* player){
         return; // Exit the function
     }
 
+
+    int difficulty;
+    if(player->difficult){
+        difficulty=1;
+    }
+    else{
+        difficulty=0;
+    }
+
+    int used_regenerate;
+    if(player->skills[3].can_be_used){
+        used_regenerate=1;
+    }
+    else{
+        used_regenerate=0;
+    }
+
+    int used_timestrike;
+    if(player->skills[3].can_be_used){
+        used_timestrike=1;
+    }
+    else{
+        used_timestrike=0;
+    }
+
+
+
     // Prints data to opened file
-    //    
+
     fprintf(fp, "%d\n", scenario->order);
     fprintf(fp, "%d\n", ((int)(player->HP - scenario->choice->options[scenario->choice->option_number]->hp_incr)));
     fprintf(fp, "%d\n", scenario->choice->option_number);
@@ -506,6 +539,10 @@ void save_game(Scenario* scenario, Character* player){
     fprintf(fp, "%d\n", player->second_skill);
     fprintf(fp, "%d\n", player->weapon);
     fprintf(fp, "%d\n", player->character_num);
+    fprintf(fp, "%d\n", difficulty);
+    fprintf(fp, "%d\n", used_regenerate);
+    fprintf(fp, "%d\n", used_timestrike);
+    fprintf(fp, "%d\n", turns);
 
     // Closes the file
     fclose(fp);
@@ -541,7 +578,10 @@ Scenario* load_game(Scenario* scenario, Character *player){
     int weapon;
     int charact;
     int option_number;
-
+    int difficulty;
+    int used_regenerate;
+    int used_timestrike;
+    int turns;
 
   while (fscanf(fp, "%d", &current_scenario) != EOF) {
         if (fscanf(fp, "%d", &life) != 1 ||
@@ -552,7 +592,11 @@ Scenario* load_game(Scenario* scenario, Character *player){
             fscanf(fp, "%d ", &first) != 1 ||
             fscanf(fp, "%d ", &second) != 1 ||
             fscanf(fp, "%d ", &weapon) != 1 ||
-            fscanf(fp, "%d ", &charact) != 1){
+            fscanf(fp, "%d ", &charact) != 1 ||
+            fscanf(fp, "%d ", &difficulty) != 1 ||
+            fscanf(fp, "%d ", &used_regenerate) != 1 ||
+            fscanf(fp, "%d ", &used_timestrike) != 1 ||
+            fscanf(fp, "%d ", &turns) != 1){
             printf("You still haven't saved any game! Defaulting to base attributes");
             // Check for errors
             
@@ -573,6 +617,8 @@ Scenario* load_game(Scenario* scenario, Character *player){
     }
 
 
+
+    
     // Keep the values inside the desired range so we don't get segmentation errors or unreasonable values
     atk%=10;
     def%=10;
@@ -583,6 +629,31 @@ Scenario* load_game(Scenario* scenario, Character *player){
     weapon%=3;
     charact%=3;
     option_number%=4;
+    difficulty%=2;
+    used_regenerate%=2;
+    used_timestrike%=2;
+    turns%=16;
+
+    if(difficulty==1){
+        player->difficult=true;
+    }
+    else{
+        player->difficult=false;
+    }
+
+    if(used_regenerate==1){
+        player->skills[3].can_be_used=true;
+    }
+    else{
+        player->skills[3].can_be_used=false;
+    }
+
+    if(used_regenerate==1){
+        player->skills[4].can_be_used=true;
+    }
+    else{
+        player->skills[4].can_be_used=false;
+    }
 
     // save the values we have retrieved from the .txt file to the palyer and scenario attributes
     player->atk_pts = atk;  
@@ -594,6 +665,7 @@ Scenario* load_game(Scenario* scenario, Character *player){
     player->weapon=weapon;
     player->character_num=charact;  
     scenario->choice->option_number=option_number;  
+    player->turns_played=turns;
 
     // close the file    
     fclose(fp);
