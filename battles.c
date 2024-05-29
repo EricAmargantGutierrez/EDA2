@@ -538,7 +538,7 @@ void save_game(Scenario* scenario, Character* player, int turns){
     fprintf(fp, "%d\n", player->first_skill);
     fprintf(fp, "%d\n", player->second_skill);
     fprintf(fp, "%d\n", player->weapon);
-    fprintf(fp, "%d\n", player->character_num);
+    fprintf(fp, "%d\n", (player->character_num));
     fprintf(fp, "%d\n", difficulty);
     fprintf(fp, "%d\n", used_regenerate);
     fprintf(fp, "%d\n", used_timestrike);
@@ -606,7 +606,7 @@ Scenario* load_game(Scenario* scenario, Character *player){
         player->first_skill = 0;
         player->second_skill = 1;
         player->weapon = 0;
-        player->character_num = 0;
+        player->character_num = 1;
         return scenario; // Exit the function
         }
         }
@@ -627,7 +627,7 @@ Scenario* load_game(Scenario* scenario, Character *player){
     first%=3;
     second%=3;
     weapon%=3;
-    charact%=3;
+    charact%=4;
     option_number%=4;
     difficulty%=2;
     used_regenerate%=2;
