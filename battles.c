@@ -239,9 +239,10 @@ int combat(Character* player, Scenario* scen){
             break;
         case 6:
             print_player_info(player);
-            printf("1. %s\n2. %s\n3. %s\n", player->skills[0].description, player->skills[1].description, player->skills[2].description);
-            if(player->skills[3].can_be_used){printf("4. %s\n", player->skills[3].description);}
-            if(player->skills[4].can_be_used){printf("5. %s\n", player->skills[4].description);}
+            for(int i=0; i<5; i++){
+            if(player->skills[i].can_be_used){printf("%d. %s\n\tAttack: %.2f\n\tDeffense: %.2f\n\tHP: %.2f\n\n",(i+1), player->skills[i].description, player->skills[i].mod_atk, player->skills[i].mod_def, player->skills[i].mod_hp);}
+            }
+            
             next_turn = false;
             break;
         case 7:
@@ -329,7 +330,7 @@ int combat(Character* player, Scenario* scen){
     }
 
     if(qturns.elements<6){
-        printf("\nCAUTION: You are low on energy. There are only 5 turns remaining in the battle. If you can't finish before then you will lose the battle!\n\n");
+        printf("\nCAUTION: You are low on energy. There are only %d turns remaining in the battle. If you can't finish before then you will lose the battle!\n\n", qturns.elements);
     }
 
     if(qturns.elements<1){
