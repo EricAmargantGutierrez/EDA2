@@ -34,7 +34,7 @@ void configure_character(Character *player, int charact) {
         player->difficult=true;
     }
     else{
-        printf("Your input was invalid. You have been defaulted to the Medium path");
+        printf("Your input was invalid. You have been defaulted to the Medium path\n");
         player->difficult=false;
     }
 

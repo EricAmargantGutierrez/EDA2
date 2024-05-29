@@ -327,6 +327,11 @@ int combat(Character* player, Scenario* scen){
         // return 1 means the battle is won
         return 1;
     }
+
+    if(qturns.elements<6){
+        printf("\nCAUTION: You are low on energy. There are only 5 turns remaining in the battle. If you can't finish before then you will lose the battle!\n\n");
+    }
+
     if(qturns.elements<1){
         // LOST THE BATTLE
         printf("You are out of turns\n");
