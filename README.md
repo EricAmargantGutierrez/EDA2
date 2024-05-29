@@ -1,5 +1,5 @@
 Group members: Eric Amargant, Pol Arbiol, Arnau Arevalo. 
-Type of game: RPG in which the player delves into the intricacies of the path toward becoming a relevant gladiator in Rome in 50 B.C. The game revolves around the struggles of rising to power both on and off the fighting pits as a gladiator. After a series of brutal encounters against powerful opponents, the user will face Rome's dictator and self-proclamied 'emperor' Lucius Cornelius Sulla on a 1 on 1 fight to the death. 
+Type of game: RPG in which the player delves into the intricacies of the path toward becoming a relevant gladiator in Rome in 50 B.C. The game revolves around the struggles of rising to power both on and off the fighting pits as a gladiator. After a series of brutal encounters against powerful opponents, the user will face Rome's dictator Lucius Cornelius Sulla on a 1 on 1 fight to the death. 
 Functionalities: 
 - Difficulty: Medium (Revives allowed), Legendary.
 - Character Selection (Arnaus Decimus Meridius, Ericus Carpophorus, Paullus Acilius Glabrio), each with different characteristics.
